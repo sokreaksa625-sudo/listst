@@ -1,0 +1,1699 @@
+<!DOCTYPE html>
+<html lang="km">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ទំព័រដើម Dashboard - ប្រព័ន្ធគ្រប់គ្រងទិន្នន័យសិស្ស</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;600;700&family=Moul&family=Kantumruy+Pro:wght@400;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Battambang', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2f6 50%, #f1f5f9 100%);
+            margin: 0;
+            padding: 0;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+
+        .khmer-moul {
+            font-family: 'Moul', cursive;
+            line-height: 1.6;
+        }
+
+        .khmer-font {
+            font-family: 'Kantumruy Pro', 'Battambang', sans-serif;
+        }
+
+        .decorative-border {
+            height: 8px;
+            background: repeating-linear-gradient(45deg, #cc2b2b, #cc2b2b 12px, #f2c94c 12px, #f2c94c 24px, #219653 24px, #219653 36px, #2b3a55 36px, #2b3a55 48px);
+        }
+
+        .hero-banner {
+            background-color: #0f172a;
+            background-image:
+                radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+                linear-gradient(135deg, #0b1120 0%, #1e293b 50%, #0f172a 100%);
+            background-size: 24px 24px, 100% 100%;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.6);
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.3);
+        }
+
+        .hero-banner::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 80% 20%, rgba(245, 158, 11, 0.15), transparent 45%),
+                radial-gradient(circle at 15% 85%, rgba(99, 102, 241, 0.18), transparent 50%);
+            pointer-events: none;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.06), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+            border-radius: 16px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 30px -10px rgba(15, 23, 42, 0.12), 0 10px 15px -5px rgba(15, 23, 42, 0.06);
+        }
+
+        .stat-card-glow {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card-glow::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+        }
+
+        .glow-indigo::after {
+            background: linear-gradient(90deg, #6366f1, #a855f7);
+        }
+
+        .glow-blue::after {
+            background: linear-gradient(90deg, #3b82f6, #06b6d4);
+        }
+
+        .glow-pink::after {
+            background: linear-gradient(90deg, #ec4899, #f43f5e);
+        }
+
+        .glow-amber::after {
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+        }
+
+        .glow-emerald::after {
+            background: linear-gradient(90deg, #10b981, #14b8a6);
+        }
+
+        .kh-table th,
+        .kh-table td {
+            padding: 10px 14px;
+            text-align: left;
+            vertical-align: middle;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .kh-table th {
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 700;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .kh-table tbody tr {
+            transition: background-color 0.15s ease;
+        }
+
+        .kh-table tbody tr:hover {
+            background-color: #f1f5f9;
+        }
+
+        /* Modal styling */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .modal-backdrop.active {
+            display: flex;
+        }
+
+        .modal-box {
+            animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes modalPop {
+            0% {
+                opacity: 0;
+                transform: scale(0.95) translateY(10px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+
+<body class="flex flex-col min-h-screen">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-[#1e293b] text-white border-b border-slate-700/60 sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Brand / Logo -->
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/30">
+                    <i class="fa-solid fa-graduation-cap text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-bold text-white tracking-wide flex items-center gap-2">
+                        <span>ប្រព័ន្ធគ្រប់គ្រងទិន្នន័យសិស្ស</span>
+                        <span
+                            class="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full font-semibold">2026</span>
+                    </h1>
+                    <p class="text-[11px] text-slate-400 hidden sm:block">Student Registration & Management System</p>
+                </div>
+            </div>
+
+            <!-- Navigation Links & User Bar -->
+            <div class="flex items-center gap-2 sm:gap-4">
+                <!-- Auth Widget: Guest buttons -->
+                <div id="auth-guest-buttons" class="flex items-center gap-2">
+                    <button onclick="openLoginModal()"
+                        class="bg-slate-700 hover:bg-slate-600 text-white text-xs sm:text-sm font-medium py-2 px-3.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-right-to-bracket text-amber-400"></i> ចូលប្រើ (Log In)
+                    </button>
+                    <button onclick="openRegisterModal()"
+                        class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-medium py-2 px-3.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-user-plus"></i> បង្កើតគណនី
+                    </button>
+                </div>
+
+                <!-- Auth Widget: Logged-in Profile (only visible when logged in) -->
+                <div id="auth-user-profile" class="hidden flex items-center gap-3">
+                    <a href="index.html"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs sm:text-sm py-2 px-3.5 rounded-lg shadow-sm hover:shadow transition flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-table-list text-indigo-200"></i>
+                        <span>តារាងបញ្ជីសិស្ស</span>
+                    </a>
+                    <div
+                        class="flex items-center gap-2.5 bg-slate-800/80 border border-slate-700 px-3 py-1.5 rounded-xl">
+                        <div
+                            class="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-slate-900 font-bold text-sm shadow">
+                            <i class="fa-solid fa-user-shield" id="profile-icon"></i>
+                        </div>
+                        <div class="text-left hidden sm:block">
+                            <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                                <span id="auth-user-name">Admin</span>
+                                <span id="auth-user-role-badge"
+                                    class="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.2 rounded uppercase font-semibold">ADMIN</span>
+                            </div>
+                            <div id="auth-user-phone" class="text-[10px] text-slate-400">012345678</div>
+                        </div>
+                    </div>
+                    <button id="btn-logout" onclick="handleLogout()"
+                        class="bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-white border border-red-500/30 py-2 px-2.5 rounded-lg text-xs transition cursor-pointer"
+                        title="ចាកចេញ">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="decorative-border w-full"></div>
+
+    <!-- HERO DASHBOARD BANNER -->
+    <section id="hero-section"
+        class="hero-banner py-16 md:py-24 text-center px-4 relative flex flex-col justify-center items-center min-h-[calc(100vh-80px)] transition-all duration-300">
+        <div class="max-w-5xl mx-auto relative z-10 w-full my-auto">
+            <!-- Badge -->
+            <div
+                class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white/90 text-xs sm:text-sm font-medium mb-5 shadow-sm">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>ប្រព័ន្ធដំណើរការធម្មតា (Online & Connected)</span>
+            </div>
+
+            <!-- Main Title as requested by user -->
+            <h1
+                class="khmer-moul text-2xl sm:text-4xl md:text-5xl font-bold tracking-wide leading-relaxed drop-shadow-md">
+                <span class="text-white">សូមស្វាគមន៍មកកាន់</span>
+                <span class="text-[#f59e0b] drop-shadow-[0_2px_12px_rgba(245,158,11,0.5)]">កម្មវិធីចុះឈ្មោះសិស្ស</span>
+            </h1>
+
+            <p class="mt-4 text-slate-300 text-sm sm:text-base md:text-lg max-w-2xl mx-auto font-light leading-relaxed">
+                ផ្ទាំងគ្រប់គ្រងទិន្នន័យចុះឈ្មោះសិស្ស ស្ថិតិទូទៅ
+    </section>
+
+    <!-- MAIN CONTENT AREA (Only visible when user has an account and is logged in) -->
+    <main id="dashboard-content" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full space-y-8">
+
+        <!-- STATS OVERVIEW CARDS -->
+        <section>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-pie text-indigo-600"></i>
+                    <span>ស្ថិតិទិន្នន័យសរុប (Live Statistics)</span>
+                </h2>
+                <button onclick="refreshDashboardData()"
+                    class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition cursor-pointer">
+                    <i class="fa-solid fa-arrows-rotate" id="refresh-icon"></i>
+                    <span>ទាញយកទិន្នន័យថ្មី</span>
+                </button>
+            </div>
+
+            <div id="live-stats-grid" class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <!-- Total Students -->
+                <div class="glass-card stat-card-glow glow-indigo p-4 sm:p-5">
+                    <div class="flex items-center justify-between text-slate-500 mb-2">
+                        <span class="text-xs sm:text-sm font-semibold">សិស្សសរុប</span>
+                        <div
+                            class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-user-graduate"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl sm:text-3xl font-extrabold text-slate-800" id="stat-total-students">
+                        <i class="fa-solid fa-spinner fa-spin text-base text-slate-400"></i>
+                    </div>
+                    <div class="text-[11px] text-slate-400 mt-1">ក្នុងប្រព័ន្ធទិន្នន័យ</div>
+                </div>
+
+                <!-- Total Male -->
+                <div class="glass-card stat-card-glow glow-blue p-4 sm:p-5">
+                    <div class="flex items-center justify-between text-slate-500 mb-2">
+                        <span class="text-xs sm:text-sm font-semibold">សិស្សប្រុស</span>
+                        <div
+                            class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-mars"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl sm:text-3xl font-extrabold text-blue-600" id="stat-total-male">
+                        <i class="fa-solid fa-spinner fa-spin text-base text-slate-400"></i>
+                    </div>
+                    <div class="text-[11px] text-slate-400 mt-1" id="stat-percent-male">គិតជាភាគរយ</div>
+                </div>
+
+                <!-- Total Female -->
+                <div class="glass-card stat-card-glow glow-pink p-4 sm:p-5">
+                    <div class="flex items-center justify-between text-slate-500 mb-2">
+                        <span class="text-xs sm:text-sm font-semibold">សិស្សស្រី</span>
+                        <div
+                            class="w-8 h-8 rounded-lg bg-pink-100 text-pink-600 flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-venus"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl sm:text-3xl font-extrabold text-pink-600" id="stat-total-female">
+                        <i class="fa-solid fa-spinner fa-spin text-base text-slate-400"></i>
+                    </div>
+                    <div class="text-[11px] text-slate-400 mt-1" id="stat-percent-female">គិតជាភាគរយ</div>
+                </div>
+
+                <!-- Total Users (Visible only to Admin) -->
+                <div id="stat-card-users" class="glass-card stat-card-glow glow-amber p-4 sm:p-5">
+                    <div class="flex items-center justify-between text-slate-500 mb-2">
+                        <span class="text-xs sm:text-sm font-semibold">គណនីអ្នកប្រើប្រាស់</span>
+                        <div
+                            class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl sm:text-3xl font-extrabold text-amber-600" id="stat-total-users">
+                        <i class="fa-solid fa-spinner fa-spin text-base text-slate-400"></i>
+                    </div>
+                    <div class="text-[11px] text-slate-400 mt-1">គណនីបានចុះឈ្មោះ</div>
+                </div>
+
+                <!-- Total Admins (Visible only to Admin) -->
+                <div id="stat-card-admins" class="glass-card stat-card-glow glow-emerald p-4 sm:p-5 col-span-2 md:col-span-1">
+                    <div class="flex items-center justify-between text-slate-500 mb-2">
+                        <span class="text-xs sm:text-sm font-semibold">អ្នកគ្រប់គ្រង (Admin)</span>
+                        <div
+                            class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl sm:text-3xl font-extrabold text-emerald-600" id="stat-total-admins">
+                        <i class="fa-solid fa-spinner fa-spin text-base text-slate-400"></i>
+                    </div>
+                    <div class="text-[11px] text-slate-400 mt-1">មានសិទ្ធិកម្រិតខ្ពស់</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GRADE BREAKDOWN CARDS -->
+        <section class="glass-card p-5 sm:p-6">
+            <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2 border-b pb-3">
+                <i class="fa-solid fa-layer-group text-amber-500"></i>
+                <span>ស្ថិតិសិស្សតាមកម្រិតថ្នាក់ (ថ្នាក់ទី១ ដល់ ទី៦)</span>
+            </h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3" id="grade-distribution-container">
+                <!-- Grade 1 -->
+                <div class="bg-white/90 hover:bg-white border border-slate-200/90 rounded-xl p-3 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-100 mb-2">
+                        <span class="text-xs font-bold text-slate-800">ថ្នាក់ទី១</span>
+                        <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                    </div>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="flex items-center justify-between">
+                            <span class="text-slate-500 flex items-center gap-1 font-medium">
+                                <i class="fa-solid fa-users text-[10px] text-slate-400"></i> សរុប៖
+                            </span>
+                            <span class="font-extrabold text-indigo-600" id="grade-total-ទី១">0 នាក់</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-pink-600/90 flex items-center gap-1 font-medium">
+                                <i class="fa-solid fa-venus text-[10px] text-pink-500"></i> ស្រី៖
+                            </span>
+                            <span class="font-extrabold text-pink-600" id="grade-female-ទី១">0 នាក់</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grade 2 -->
+                <div class="bg-white/90 hover:bg-white border border-slate-200/90 rounded-xl p-3 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-100 mb-2">
+                        <span class="text-xs font-bold text-slate-800">ថ្នាក់ទី២</span>
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                    </div>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="flex items-center justify-between">
+                            <span class="text-slate-500 flex items-center gap-1 font-medium">
+                                <i class="fa-solid fa-users text-[10px] text-slate-400"></i> សរុប៖
+                            </span>
+                            <span class="font-extrabold text-indigo-600" id="grade-total-ទី២">0 នាក់</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-pink-600/90 flex items-center gap-1 font-medium">
+                                <i class="fa-solid fa-venus text-[10px] text-pink-500"></i> ស្រី៖
+                            </span>
+                            <span class="font-extrabold text-pink-600" id="grade-female-ទី២">0 នាក់</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grade 3 -->
+                <div class="bg-white/90 hover:bg-white border border-slate-200/90 rounded-xl p-3 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-100 mb-2">
+                        <span class="text-xs font-bold text-slate-800">ថ្នាក់ទី៣</span>
+                        <span class="w-2 h-2 rounded-full bg-teal-500"></span>
+                    </div>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="flex items-center justify-between">
+                            <span class="text-slate-500 flex items-center gap-1 font-medium">
+                                <i class="fa-solid fa-users text-[10px] text-slate-400"></i> សរុប៖
+                            </span>
+                            <span class="font-extrabold text-indigo-600" id="grade-total-ទី៣">0 នាក់</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-pink-600/90 flex items-center gap-1 font-medium">
+                                <i class="fa-solid fa-venus text-[10px] text-pink-500"></i> ស្រី៖
+                            </span>
+                            <span class="font-extrabold text-pink-600" id="grade-female-ទី៣">0 នាក់</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grade 4 -->
+                <div class="bg-white/90 hover:bg-white border border-slate-200/90 rounded-xl p-3 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-100 mb-2">
+                        <span class="text-xs font-bold text-slate-800">ថ្នាក់ទី៤</span>
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    </div>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="flex items-center justify-between">
+                            <span class="text-slate-500 flex items-center gap-1 font-medium">
+                                <i class="fa-solid fa-users text-[10px] text-slate-400"></i> សរុប៖
+                            </span>
+                            <span class="font-extrabold text-indigo-600" id="grade-total-ទី៤">0 នាក់</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-pink-600/90 flex items-center gap-1 font-medium">
+                                <i class="fa-solid fa-venus text-[10px] text-pink-500"></i> ស្រី៖
+                            </span>
+                            <span class="font-extrabold text-pink-600" id="grade-female-ទី៤">0 នាក់</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grade 5 -->
+                <div class="bg-white/90 hover:bg-white border border-slate-200/90 rounded-xl p-3 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-100 mb-2">
+                        <span class="text-xs font-bold text-slate-800">ថ្នាក់ទី៥</span>
+                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                    </div>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="flex items-center justify-between">
+                            <span class="text-slate-500 flex items-center gap-1 font-medium">
+                                <i class="fa-solid fa-users text-[10px] text-slate-400"></i> សរុប៖
+                            </span>
+                            <span class="font-extrabold text-indigo-600" id="grade-total-ទី៥">0 នាក់</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-pink-600/90 flex items-center gap-1 font-medium">
+                                <i class="fa-solid fa-venus text-[10px] text-pink-500"></i> ស្រី៖
+                            </span>
+                            <span class="font-extrabold text-pink-600" id="grade-female-ទី៥">0 នាក់</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grade 6 -->
+                <div class="bg-white/90 hover:bg-white border border-slate-200/90 rounded-xl p-3 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-100 mb-2">
+                        <span class="text-xs font-bold text-slate-800">ថ្នាក់ទី៦</span>
+                        <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                    </div>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="flex items-center justify-between">
+                            <span class="text-slate-500 flex items-center gap-1 font-medium">
+                                <i class="fa-solid fa-users text-[10px] text-slate-400"></i> សរុប៖
+                            </span>
+                            <span class="font-extrabold text-indigo-600" id="grade-total-ទី៦">0 នាក់</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-pink-600/90 flex items-center gap-1 font-medium">
+                                <i class="fa-solid fa-venus text-[10px] text-pink-500"></i> ស្រី៖
+                            </span>
+                            <span class="font-extrabold text-pink-600" id="grade-female-ទី៦">0 នាក់</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ADMIN USER & PASSWORD MANAGEMENT SECTION (Visible only to Admin) -->
+        <section id="admin-users-section" class="hidden glass-card p-5 sm:p-7 border-t-4 border-t-amber-500">
+            <!-- Header bar for User Management -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+                <div>
+                    <div
+                        class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-md uppercase tracking-wider mb-1.5">
+                        <i class="fa-solid fa-lock"></i> តំបន់គ្រប់គ្រងរបស់ Admin
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-user-shield text-amber-500"></i>
+                        <span>ការគ្រប់គ្រងគណនីអ្នកប្រើប្រាស់ និងពាក្យសម្ងាត់ (User & Password Management)</span>
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                        Admin អាចមើល ផ្លាស់ប្តូរពាក្យសម្ងាត់ កែប្រែព័ត៌មាន ឬលុបគណនីដែលបានបង្កើតថ្មីទាំងអស់
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-2.5 flex-wrap">
+                    <button onclick="openAdminCreateUserModal()"
+                        class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm py-2 px-4 rounded-xl shadow-md shadow-emerald-600/20 hover:shadow-lg transition flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>បង្កើតគណនីថ្មី (Add User)</span>
+                    </button>
+                    <button onclick="loadAllUsers()"
+                        class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs sm:text-sm py-2 px-3 rounded-xl border border-slate-300 transition flex items-center gap-1.5 cursor-pointer"
+                        title="ទាញយកបញ្ជីឡើងវិញ">
+                        <i class="fa-solid fa-rotate text-slate-500" id="user-refresh-icon"></i>
+                        <span>Refresh</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search and Filter Bar -->
+            <div class="mt-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div class="relative w-full sm:w-80">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="user-search-input" onkeyup="filterUsersTable()"
+                        placeholder="ស្វែងរកតាមឈ្មោះ, Username ឬលេខទូរស័ព្ទ..."
+                        class="w-full pl-9 pr-3 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/50 bg-white">
+                </div>
+
+                <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                    <span class="text-xs text-slate-500 font-semibold">តម្រងតាមសិទ្ធិ:</span>
+                    <select id="user-role-filter" onchange="filterUsersTable()"
+                        class="text-xs sm:text-sm border border-slate-300 rounded-xl px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/50">
+                        <option value="all">ទាំងអស់ (All Roles)</option>
+                        <option value="admin">Admin</option>
+                        <option value="user">User</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Users Table Container -->
+            <div class="mt-4 overflow-x-auto border border-slate-200 rounded-xl bg-white shadow-xs">
+                <table class="kh-table w-full">
+                    <thead>
+                        <tr>
+                            <th style="width: 45px;">ល.រ</th>
+                            <th>ឈ្មោះពេញ (Full Name)</th>
+                            <th>ឈ្មោះគណនី (Username)</th>
+                            <th>លេខទូរស័ព្ទ (Phone)</th>
+                            <th style="min-width: 140px; text-align: center;">លេខកូដ (Password)</th>
+                            <th>សិទ្ធិ (Role)</th>
+                            <th>ថ្ងៃបង្កើត (Created Date)</th>
+                            <th style="text-align: center; width: 220px;">សកម្មភាពគ្រប់គ្រង (Actions)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <tr>
+                            <td colspan="8" class="text-center py-8 text-slate-400">
+                                <i class="fa-solid fa-spinner fa-spin text-xl text-amber-500 mb-2"></i>
+                                <div>កំពុងទាញយកបញ្ជីគណនីទាំងអស់ពី Database...</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table footer info -->
+            <div class="mt-3 flex items-center justify-between text-xs text-slate-500">
+                <div>បង្ហាញ៖ <span id="users-count-display" class="font-bold text-slate-700">0</span> គណនី</div>
+                <div class="text-[11px] text-slate-400">ទិន្នន័យត្រូវបានការពារដោយប្រព័ន្ធសុវត្ថិភាព Hash Password</div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-400 text-center py-6 text-xs border-t border-slate-800 mt-12">
+        <div class="max-w-7xl mx-auto px-4 space-y-2">
+            <p class="text-slate-300 font-semibold">ប្រព័ន្ធគ្រប់គ្រងទិន្នន័យសិស្ស © 2026</p>
+
+        </div>
+    </footer>
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- 1. ADMIN UPDATE PASSWORD MODAL -->
+    <div id="modal-update-password" class="modal-backdrop">
+        <div class="modal-box bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 relative">
+            <button onclick="closeModal('modal-update-password')"
+                class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-key"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">ប្តូរពាក្យសម្ងាត់អ្នកប្រើប្រាស់</h3>
+                    <p class="text-xs text-slate-500">Admin Change User Password</p>
+                </div>
+            </div>
+
+            <!-- Alert in modal -->
+            <div id="pwd-modal-alert" class="hidden mb-4 p-3 rounded-xl text-xs font-medium"></div>
+
+            <form id="form-update-password" onsubmit="submitAdminPasswordChange(event)" class="space-y-4">
+                <input type="hidden" id="pwd-user-id">
+
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1 text-xs">
+                    <div class="text-slate-500">គណនីដែលត្រូវប្តូរ៖</div>
+                    <div class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                        <span id="pwd-target-fullname">សុខ សាន្ត</span>
+                        <span class="text-slate-400">(@<span id="pwd-target-username">user</span>)</span>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-xs font-semibold text-slate-700">ពាក្យសម្ងាត់ថ្មី (New Password) <span
+                                class="text-red-500">*</span></label>
+                        <button type="button" onclick="generateRandomPassword()"
+                            class="text-[11px] text-indigo-600 hover:text-indigo-800 font-semibold">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> បង្កើតដោយចៃដន្យ
+                        </button>
+                    </div>
+                    <div class="relative">
+                        <input type="password" id="pwd-new-password" required minlength="4"
+                            placeholder="បញ្ចូលពាក្យសម្ងាត់ថ្មី (យ៉ាងតិច ៤ តួ)..."
+                            class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/50 pr-10">
+                        <button type="button" onclick="togglePasswordVisibility('pwd-new-password', 'pwd-toggle-icon')"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <i class="fa-solid fa-eye" id="pwd-toggle-icon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">បញ្ជាក់ពាក្យសម្ងាត់ថ្មី (Confirm New
+                        Password) <span class="text-red-500">*</span></label>
+                    <input type="password" id="pwd-confirm-password" required minlength="4"
+                        placeholder="វាយបញ្ចូលពាក្យសម្ងាត់ថ្មីម្តងទៀត..."
+                        class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/50">
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('modal-update-password')"
+                        class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition">
+                        បោះបង់
+                    </button>
+                    <button type="submit" id="btn-submit-password"
+                        class="px-5 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-md shadow-amber-500/30 transition flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-check"></i> រក្សាទុកពាក្យសម្ងាត់
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. ADMIN EDIT USER MODAL -->
+    <div id="modal-edit-user" class="modal-backdrop">
+        <div class="modal-box bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 relative">
+            <button onclick="closeModal('modal-edit-user')"
+                class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-user-pen"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">កែប្រែព័ត៌មានគណនី</h3>
+                    <p class="text-xs text-slate-500">Edit User Account Information</p>
+                </div>
+            </div>
+
+            <!-- Alert in modal -->
+            <div id="edit-user-modal-alert" class="hidden mb-4 p-3 rounded-xl text-xs font-medium"></div>
+
+            <form id="form-edit-user" onsubmit="submitAdminEditUser(event)" class="space-y-4">
+                <input type="hidden" id="edit-user-id">
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">ឈ្មោះគណនី (Username) -
+                        មិនអាចកែប្រែបានទេ</label>
+                    <input type="text" id="edit-user-username" disabled
+                        class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-200 rounded-xl bg-slate-100 text-slate-500 font-semibold cursor-not-allowed">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">គោត្តនាម និងនាម (Full Name) <span
+                            class="text-red-500">*</span></label>
+                    <input type="text" id="edit-user-fullname" required placeholder="ឧ. សុខ សាន្ត"
+                        class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">លេខទូរស័ព្ទ (Phone Number) <span
+                            class="text-red-500">*</span></label>
+                    <input type="tel" id="edit-user-phone" required placeholder="ឧ. 012345678"
+                        class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">សិទ្ធិប្រើប្រាស់ (Role) <span
+                            class="text-red-500">*</span></label>
+                    <select id="edit-user-role" required
+                        class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-white">
+                        <option value="user">User (អ្នកប្រើធម្មតា)</option>
+                        <option value="admin">Admin (អ្នកគ្រប់គ្រង)</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('modal-edit-user')"
+                        class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition">
+                        បោះបង់
+                    </button>
+                    <button type="submit" id="btn-submit-edit-user"
+                        class="px-5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md shadow-blue-600/30 transition flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-save"></i> រក្សាទុកព័ត៌មាន
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. ADMIN CREATE USER MODAL -->
+    <div id="modal-create-user" class="modal-backdrop">
+        <div class="modal-box bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 relative">
+            <button onclick="closeModal('modal-create-user')"
+                class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-4">
+                <div
+                    class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">បង្កើតគណនីថ្មី (Admin Panel)</h3>
+                    <p class="text-xs text-slate-500">Create New Account with Role</p>
+                </div>
+            </div>
+
+            <!-- Alert in modal -->
+            <div id="create-user-modal-alert" class="hidden mb-4 p-3 rounded-xl text-xs font-medium"></div>
+
+            <form id="form-create-user" onsubmit="submitAdminCreateUser(event)" class="space-y-3.5">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">គោត្តនាម និងនាម (Full Name) <span
+                            class="text-red-500">*</span></label>
+                    <input type="text" id="create-fullname" required placeholder="ឧ. ហេង ពិសិដ្ឋ"
+                        class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">ឈ្មោះគណនី (Username) <span
+                            class="text-red-500">*</span></label>
+                    <input type="text" id="create-username" required placeholder="ឧ. piseth123"
+                        class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">លេខទូរស័ព្ទ (Phone Number) <span
+                            class="text-red-500">*</span></label>
+                    <input type="tel" id="create-phone" required placeholder="ឧ. 0881234567"
+                        class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">ពាក្យសម្ងាត់ (Password) <span
+                            class="text-red-500">*</span></label>
+                    <input type="password" id="create-password" required minlength="4"
+                        placeholder="កំណត់ពាក្យសម្ងាត់ (យ៉ាងតិច ៤ តួ)..."
+                        class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">កំណត់សិទ្ធិ (Role) <span
+                            class="text-red-500">*</span></label>
+                    <select id="create-role" required
+                        class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 bg-white">
+                        <option value="user">User (អ្នកប្រើធម្មតា)</option>
+                        <option value="admin">Admin (អ្នកគ្រប់គ្រង)</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('modal-create-user')"
+                        class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition">
+                        បោះបង់
+                    </button>
+                    <button type="submit" id="btn-submit-create-user"
+                        class="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md shadow-emerald-600/30 transition flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-plus"></i> បង្កើតគណនី
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 4. LOGIN MODAL -->
+    <div id="modal-login" class="modal-backdrop">
+        <div class="modal-box bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 relative">
+            <button onclick="closeModal('modal-login')"
+                class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-4">
+                <div
+                    class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">ចូលប្រើប្រព័ន្ធ</h3>
+                    <p class="text-xs text-slate-500">Sign In to Student System</p>
+                </div>
+            </div>
+
+            <div id="login-modal-alert" class="hidden mb-4 p-3 rounded-xl text-xs font-medium"></div>
+
+            <form id="form-login" onsubmit="submitLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">ឈ្មោះគណនី ឬលេខទូរស័ព្ទ <span
+                            class="text-red-500">*</span></label>
+                    <input type="text" id="login-username" required placeholder="បញ្ចូល Username ឬ លេខទូរស័ព្ទ..."
+                        class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-xs font-semibold text-slate-700">ពាក្យសម្ងាត់ <span
+                                class="text-red-500">*</span></label>
+                        <a href="javascript:void(0)" onclick="closeModal('modal-login'); openRegisterModal();"
+                            class="text-[11px] text-indigo-600 hover:underline">
+                            មិនទាន់មានគណនី?
+                        </a>
+                    </div>
+                    <div class="relative">
+                        <input type="password" id="login-password" required placeholder="បញ្ចូលពាក្យសម្ងាត់..."
+                            class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 pr-10">
+                        <button type="button" onclick="togglePasswordVisibility('login-password', 'login-pwd-icon')"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <i class="fa-solid fa-eye" id="login-pwd-icon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-500">
+                    <span class="font-bold text-slate-700">គណនី Admin គំរូ៖</span> Username: <code>admin</code> /
+                    Password: <code>admin123</code>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('modal-login')"
+                        class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition">
+                        បោះបង់
+                    </button>
+                    <button type="submit" id="btn-submit-login"
+                        class="px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-600/30 transition flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-right-to-bracket"></i> ចូលប្រើ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 5. REGISTER MODAL -->
+    <div id="modal-register" class="modal-backdrop">
+        <div class="modal-box bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 relative">
+            <button onclick="closeModal('modal-register')"
+                class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-4">
+                <div
+                    class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">ចុះឈ្មោះគណនីថ្មី</h3>
+                    <p class="text-xs text-slate-500">Create New Account</p>
+                </div>
+            </div>
+
+            <div id="register-modal-alert" class="hidden mb-4 p-3 rounded-xl text-xs font-medium"></div>
+
+            <form id="form-register" onsubmit="submitRegister(event)" class="space-y-3.5">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">គោត្តនាម និងនាម <span
+                            class="text-red-500">*</span></label>
+                    <input type="text" id="reg-fullname" required placeholder="ឧ. ចាន់ ធារ៉ា"
+                        class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">ឈ្មោះគណនី (Username) <span
+                            class="text-red-500">*</span></label>
+                    <input type="text" id="reg-username" required placeholder="ឧ. theara123"
+                        class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">លេខទូរស័ព្ទ (Phone Number) <span
+                            class="text-red-500">*</span></label>
+                    <input type="tel" id="reg-phone" required placeholder="ឧ. 012998877"
+                        class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">ពាក្យសម្ងាត់ <span
+                            class="text-red-500">*</span></label>
+                    <input type="password" id="reg-password" required minlength="4" placeholder="កំណត់ពាក្យសម្ងាត់..."
+                        class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">បញ្ជាក់ពាក្យសម្ងាត់ <span
+                            class="text-red-500">*</span></label>
+                    <input type="password" id="reg-confirm-password" required minlength="4"
+                        placeholder="វាយបញ្ជាក់ពាក្យសម្ងាត់ម្តងទៀត..."
+                        class="w-full text-xs sm:text-sm px-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('modal-register')"
+                        class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition">
+                        បោះបង់
+                    </button>
+                    <button type="submit" id="btn-submit-register"
+                        class="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md shadow-emerald-600/30 transition flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-check"></i> បង្កើតគណនី
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-[1000] space-y-2 pointer-events-none"></div>
+
+    <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+    <script>
+        // State variables
+        let currentUser = null;
+        let allUsersData = [];
+
+        // Toast Notification Helper
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto px-4 py-3 rounded-xl shadow-lg border text-xs sm:text-sm font-semibold flex items-center gap-2 transform transition-all duration-300 translate-y-2 opacity-0 ${type === 'success' ? 'bg-emerald-600 text-white border-emerald-500 shadow-emerald-600/20' :
+                type === 'error' ? 'bg-red-600 text-white border-red-500 shadow-red-600/20' :
+                    'bg-slate-800 text-white border-slate-700 shadow-slate-900/20'
+                }`;
+
+            const icon = type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-info';
+            toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
+            container.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Modal Helpers
+        function openModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('active');
+        }
+
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('active');
+        }
+
+        function openLoginModal() {
+            clearAlert('login-modal-alert');
+            openModal('modal-login');
+        }
+
+        function openRegisterModal() {
+            clearAlert('register-modal-alert');
+            openModal('modal-register');
+        }
+
+        function openAdminCreateUserModal() {
+            clearAlert('create-user-modal-alert');
+            document.getElementById('form-create-user').reset();
+            openModal('modal-create-user');
+        }
+
+        function showAlert(elementId, message, type = 'error') {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            el.className = `mb-4 p-3 rounded-xl text-xs font-semibold ${type === 'error' ? 'bg-red-50 border border-red-200 text-red-700' : 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+                }`;
+            el.innerHTML = message;
+            el.classList.remove('hidden');
+        }
+
+        function clearAlert(elementId) {
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.innerHTML = '';
+                el.classList.add('hidden');
+            }
+        }
+
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (!input || !icon) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-solid fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-solid fa-eye';
+            }
+        }
+
+        function generateRandomPassword() {
+            const chars = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789!@#$%";
+            let pwd = "";
+            for (let i = 0; i < 8; i++) {
+                pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('pwd-new-password').value = pwd;
+            document.getElementById('pwd-confirm-password').value = pwd;
+            document.getElementById('pwd-new-password').type = 'text';
+            showToast("បានបង្កើតពាក្យសម្ងាត់ថ្មីដោយស្វ័យប្រវត្តិ!", "info");
+        }
+
+        // Auth & Session Management
+        function initAuth() {
+            const saved = localStorage.getItem('sms_current_user');
+            if (saved) {
+                try {
+                    currentUser = JSON.parse(saved);
+                    updateAuthUI();
+                } catch (e) {
+                    currentUser = null;
+                }
+            } else {
+                currentUser = null;
+                updateAuthUI();
+                return;
+            }
+
+            // Sync with backend session
+            fetch('databeas.php?action=check_session')
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success && res.data) {
+                        currentUser = res.data;
+                        localStorage.setItem('sms_current_user', JSON.stringify(currentUser));
+                        refreshDashboardData();
+                        if (currentUser.role === 'admin') {
+                            loadAllUsers();
+                        }
+                    } else {
+                        currentUser = null;
+                        localStorage.removeItem('sms_current_user');
+                    }
+                    updateAuthUI();
+                })
+                .catch(() => updateAuthUI());
+        }
+
+        function updateAuthUI() {
+            const guestBtns = document.getElementById('auth-guest-buttons');
+            const userProfile = document.getElementById('auth-user-profile');
+            const userNameEl = document.getElementById('auth-user-name');
+            const userRoleBadge = document.getElementById('auth-user-role-badge');
+            const userPhoneEl = document.getElementById('auth-user-phone');
+            const dashboardContent = document.getElementById('dashboard-content');
+            const heroSection = document.getElementById('hero-section');
+            const adminUsersSection = document.getElementById('admin-users-section');
+
+            if (currentUser) {
+                guestBtns.classList.add('hidden');
+                userProfile.classList.remove('hidden');
+                if (dashboardContent) dashboardContent.classList.remove('hidden');
+                if (heroSection) {
+                    heroSection.classList.remove('min-h-[calc(100vh-80px)]');
+                    heroSection.classList.add('py-12', 'md:py-16');
+                    heroSection.classList.remove('py-16', 'md:py-24');
+                }
+
+                if (userNameEl) userNameEl.textContent = currentUser.fullname || currentUser.username;
+                const isAdmin = (currentUser.role === 'admin');
+                if (userRoleBadge) {
+                    userRoleBadge.textContent = (currentUser.role || 'user').toUpperCase();
+                    userRoleBadge.className = isAdmin
+                        ? 'text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.2 rounded uppercase font-semibold'
+                        : 'text-[9px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-1.5 py-0.2 rounded uppercase font-semibold';
+                }
+                if (userPhoneEl) userPhoneEl.textContent = currentUser.phone || currentUser.username;
+
+                // ការគ្រប់គ្រងគណនីអ្នកប្រើប្រាស់ និងពាក្យសម្ងាត់ (User & Password Management) បង្ហាញតែគណនី admin តែប៉ុណ្ណោះ!
+                if (adminUsersSection) {
+                    if (isAdmin) {
+                        adminUsersSection.classList.remove('hidden');
+                    } else {
+                        adminUsersSection.classList.add('hidden');
+                    }
+                }
+
+                // ចំពោះផ្ទាំង uses (User role) សូមមិនបង្ហាញ Live Statistics គណនីអ្នកប្រើប្រាស់ និង អ្នកគ្រប់គ្រង
+                const statCardUsers = document.getElementById('stat-card-users');
+                const statCardAdmins = document.getElementById('stat-card-admins');
+                const liveStatsGrid = document.getElementById('live-stats-grid');
+                if (statCardUsers && statCardAdmins && liveStatsGrid) {
+                    if (isAdmin) {
+                        statCardUsers.classList.remove('hidden');
+                        statCardAdmins.classList.remove('hidden');
+                        liveStatsGrid.className = 'grid grid-cols-2 md:grid-cols-5 gap-4';
+                    } else {
+                        statCardUsers.classList.add('hidden');
+                        statCardAdmins.classList.add('hidden');
+                        liveStatsGrid.className = 'grid grid-cols-1 sm:grid-cols-3 gap-4';
+                    }
+                }
+            } else {
+                guestBtns.classList.remove('hidden');
+                userProfile.classList.add('hidden');
+                if (dashboardContent) dashboardContent.classList.add('hidden');
+                if (heroSection) {
+                    heroSection.classList.add('min-h-[calc(100vh-80px)]');
+                    heroSection.classList.remove('py-12', 'md:py-16');
+                    heroSection.classList.add('py-16', 'md:py-24');
+                }
+                if (adminUsersSection) {
+                    adminUsersSection.classList.add('hidden');
+                }
+            }
+        }
+
+        async function submitLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+            const btn = document.getElementById('btn-submit-login');
+            const originalText = btn.innerHTML;
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> កំពុងផ្ទៀងផ្ទាត់...';
+
+            try {
+                const response = await fetch('databeas.php?action=login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    currentUser = result.data;
+                    localStorage.setItem('sms_current_user', JSON.stringify(currentUser));
+                    updateAuthUI();
+                    closeModal('modal-login');
+                    document.getElementById('form-login').reset();
+                    showToast(`សូមស្វាគមន៍មកកាន់ប្រព័ន្ធ, ${currentUser.fullname || currentUser.username}!`, "success");
+                    refreshDashboardData();
+                    if (currentUser.role === 'admin') {
+                        loadAllUsers();
+                    }
+                } else {
+                    showAlert('login-modal-alert', result.message || 'ឈ្មោះគណនី ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ!');
+                }
+            } catch (err) {
+                showAlert('login-modal-alert', 'មិនអាចភ្ជាប់ទៅកាន់ Server បានទេ! សូមប្រាកដថាបានបើក Apache & MySQL ក្នុង XAMPP។');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        async function submitRegister(e) {
+            e.preventDefault();
+            const fullname = document.getElementById('reg-fullname').value.trim();
+            const username = document.getElementById('reg-username').value.trim();
+            const phone = document.getElementById('reg-phone').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('reg-confirm-password').value;
+            const btn = document.getElementById('btn-submit-register');
+            const originalText = btn.innerHTML;
+
+            if (password !== confirmPassword) {
+                showAlert('register-modal-alert', 'ពាក្យសម្ងាត់ទាំងពីរមិនដូចគ្នាទេ!');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> កំពុងចុះឈ្មោះ...';
+
+            try {
+                const response = await fetch('databeas.php?action=register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fullname, username, phone, password })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    currentUser = result.data;
+                    localStorage.setItem('sms_current_user', JSON.stringify(currentUser));
+                    updateAuthUI();
+                    closeModal('modal-register');
+                    document.getElementById('form-register').reset();
+                    showToast("គណនីរបស់អ្នកត្រូវបានបង្កើតដោយជោគជ័យ!", "success");
+                    refreshDashboardData();
+                    if (currentUser.role === 'admin') {
+                        loadAllUsers();
+                    }
+                } else {
+                    showAlert('register-modal-alert', result.message || 'មិនអាចបង្កើតគណនីបានទេ!');
+                }
+            } catch (err) {
+                showAlert('register-modal-alert', 'មិនអាចភ្ជាប់ទៅកាន់ Server បានទេ!');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        async function handleLogout() {
+            try {
+                await fetch('databeas.php?action=logout');
+            } catch (e) { }
+            currentUser = null;
+            localStorage.removeItem('sms_current_user');
+            updateAuthUI();
+            showToast("អ្នកបានចាកចេញពីគណនីដោយជោគជ័យ។", "info");
+        }
+
+        // Live Dashboard Statistics
+        async function refreshDashboardData() {
+            const refreshIcon = document.getElementById('refresh-icon');
+            if (refreshIcon) refreshIcon.classList.add('fa-spin');
+
+            try {
+                const response = await fetch('databeas.php?action=dashboard_stats');
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    const d = result.data;
+                    document.getElementById('stat-total-students').textContent = d.total_students.toLocaleString();
+                    document.getElementById('stat-total-male').textContent = d.total_male.toLocaleString();
+                    document.getElementById('stat-total-female').textContent = d.total_female.toLocaleString();
+                    
+                    const elUsers = document.getElementById('stat-total-users');
+                    const elAdmins = document.getElementById('stat-total-admins');
+                    if (elUsers) elUsers.textContent = (d.total_users || 0).toLocaleString();
+                    if (elAdmins) elAdmins.textContent = (d.total_admins || 0).toLocaleString();
+
+                    // Calculate percentages
+                    if (d.total_students > 0) {
+                        const mPct = Math.round((d.total_male / d.total_students) * 100);
+                        const fPct = Math.round((d.total_female / d.total_students) * 100);
+                        document.getElementById('stat-percent-male').textContent = `${mPct}% នៃសិស្សសរុប`;
+                        document.getElementById('stat-percent-female').textContent = `${fPct}% នៃសិស្សសរុប`;
+                    } else {
+                        document.getElementById('stat-percent-male').textContent = `0%`;
+                        document.getElementById('stat-percent-female').textContent = `0%`;
+                    }
+
+                    // Grade counts (សរុប និង ស្រី តាមកម្រិតថ្នាក់)
+                    if (d.grade_counts) {
+                        for (const [grade, data] of Object.entries(d.grade_counts)) {
+                            const total = (typeof data === 'object' && data !== null) ? (data.total || 0) : data;
+                            const female = (typeof data === 'object' && data !== null) ? (data.female || 0) : 0;
+
+                            const totalEl = document.getElementById(`grade-total-${grade}`);
+                            const femaleEl = document.getElementById(`grade-female-${grade}`);
+                            const oldValEl = document.getElementById(`grade-val-${grade}`);
+
+                            if (totalEl) totalEl.textContent = `${total} នាក់`;
+                            if (femaleEl) femaleEl.textContent = `${female} នាក់`;
+                            if (oldValEl) oldValEl.textContent = `${total} នាក់`;
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("Dashboard stats error:", err);
+            } finally {
+                if (refreshIcon) {
+                    setTimeout(() => refreshIcon.classList.remove('fa-spin'), 400);
+                }
+            }
+        }
+
+        // ADMIN USER & PASSWORD MANAGEMENT
+        async function loadAllUsers() {
+            const tbody = document.getElementById('users-table-body');
+            const icon = document.getElementById('user-refresh-icon');
+            if (icon) icon.classList.add('fa-spin');
+
+            try {
+                const response = await fetch('databeas.php?action=get_users');
+                const result = await response.json();
+
+                if (result.success && Array.isArray(result.data)) {
+                    allUsersData = result.data;
+                    renderUsersTable(allUsersData);
+                    document.getElementById('users-count-display').textContent = allUsersData.length;
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-red-500">${result.message || 'មិនអាចទាញយកទិន្នន័យបានទេ'}</td></tr>`;
+                }
+            } catch (err) {
+                console.error("Load users error:", err);
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-red-500">កំហុសក្នុងការតភ្ជាប់ទៅកាន់ Database!</td></tr>`;
+            } finally {
+                if (icon) {
+                    setTimeout(() => icon.classList.remove('fa-spin'), 400);
+                }
+            }
+        }
+
+        function renderUsersTable(users) {
+            const tbody = document.getElementById('users-table-body');
+            if (!users || users.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-slate-400">ពុំមានគណនីណាមួយត្រូវបានរកឃើញឡើយ</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            users.forEach((user, idx) => {
+                const isAdmin = (user.role === 'admin');
+                const roleBadge = isAdmin
+                    ? `<span class="inline-flex items-center gap-1 bg-amber-100 text-amber-800 font-bold px-2.5 py-0.5 rounded-full text-[11px] border border-amber-200 shadow-xs"><i class="fa-solid fa-shield-halved text-[10px]"></i> ADMIN</span>`
+                    : `<span class="inline-flex items-center gap-1 bg-slate-100 text-slate-700 font-semibold px-2 py-0.5 rounded-full text-[11px] border border-slate-200"><i class="fa-solid fa-user text-[10px]"></i> USER</span>`;
+
+                const createdDate = user.created_at ? user.created_at.substring(0, 16) : '-';
+
+                html += `
+                <tr class="border-b hover:bg-slate-50 transition">
+                    <td class="font-bold text-slate-500 text-xs">${idx + 1}</td>
+                    <td class="font-semibold text-slate-800 text-xs sm:text-sm">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-full ${isAdmin ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'} flex items-center justify-center text-xs font-bold">
+                                ${user.fullname ? user.fullname.charAt(0) : 'U'}
+                            </div>
+                            <span>${escapeHtml(user.fullname || '-')}</span>
+                        </div>
+                    </td>
+                    <td class="text-xs text-slate-600 font-mono">
+                        <span class="bg-slate-100 px-2 py-0.5 rounded border border-slate-200">@${escapeHtml(user.username)}</span>
+                    </td>
+                    <td class="text-xs text-slate-700 font-mono">
+                        <i class="fa-solid fa-phone text-[10px] text-slate-400 mr-1"></i>${escapeHtml(user.phone || '-')}
+                    </td>
+                    <td class="text-xs text-slate-700 font-mono text-center">
+                        <div class="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200/70 border border-slate-200 px-2.5 py-1 rounded-lg transition shadow-2xs">
+                            <span id="user-pwd-text-${user.id}" class="tracking-widest font-mono font-bold text-slate-700 select-all">••••••</span>
+                            <button type="button" onclick="toggleUserPasswordVisibility(${user.id}, '${escapeJs(user.plain_password || '')}')" 
+                                class="text-slate-400 hover:text-amber-600 p-0.5 transition cursor-pointer" 
+                                title="ចុចដើម្បីមើល ឬលាក់លេខកូដ">
+                                <i class="fa-solid fa-eye text-xs" id="pwd-eye-icon-${user.id}"></i>
+                            </button>
+                        </div>
+                    </td>
+                    <td>${roleBadge}</td>
+                    <td class="text-xs text-slate-500 whitespace-nowrap">${createdDate}</td>
+                    <td>
+                        <div class="flex items-center justify-center gap-1.5 flex-nowrap">
+                            <!-- Change Password button -->
+                            <button onclick="openChangePasswordModal(${user.id}, '${escapeJs(user.username)}', '${escapeJs(user.fullname)}')" 
+                                class="bg-amber-500 hover:bg-amber-600 text-white font-medium text-xs py-1.5 px-2.5 rounded-lg shadow-xs hover:shadow transition flex items-center gap-1 cursor-pointer"
+                                title="ប្តូរពាក្យសម្ងាត់សម្រាប់ ${escapeHtml(user.username)}">
+                                <i class="fa-solid fa-key text-[11px]"></i>
+                                <span class="hidden sm:inline">ប្តូរលេខកូដ</span>
+                            </button>
+
+                            <!-- Edit Info button -->
+                            <button onclick="openEditUserModal(${user.id}, '${escapeJs(user.username)}', '${escapeJs(user.fullname)}', '${escapeJs(user.phone)}', '${user.role}')"
+                                class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs py-1.5 px-2.5 rounded-lg shadow-xs hover:shadow transition flex items-center gap-1 cursor-pointer"
+                                title="កែប្រែព័ត៌មាន ${escapeHtml(user.username)}">
+                                <i class="fa-solid fa-pen-to-square text-[11px]"></i>
+                                <span class="hidden sm:inline">កែប្រែ</span>
+                            </button>
+
+                            <!-- Delete button (safeguarded) -->
+                            ${user.username !== 'admin' ? `
+                            <button onclick="confirmDeleteUser(${user.id}, '${escapeJs(user.username)}', '${escapeJs(user.fullname)}')"
+                                class="bg-red-50 hover:bg-red-500 text-red-600 hover:text-white border border-red-200 hover:border-red-500 font-medium text-xs py-1.5 px-2 rounded-lg transition flex items-center gap-1 cursor-pointer"
+                                title="លុបគណនី">
+                                <i class="fa-solid fa-trash-can text-[11px]"></i>
+                            </button>
+                            ` : `
+                            <span class="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-1 rounded" title="គណនី Master Admin មិនអាចលុបបានឡើយ">Protected</span>
+                            `}
+                        </div>
+                    </td>
+                </tr>`;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        // Toggle user password visibility in admin table
+        function toggleUserPasswordVisibility(userId, plainPassword) {
+            const textEl = document.getElementById(`user-pwd-text-${userId}`);
+            const iconEl = document.getElementById(`pwd-eye-icon-${userId}`);
+            if (!textEl || !iconEl) return;
+
+            const isMasked = iconEl.classList.contains('fa-eye');
+            if (isMasked) {
+                textEl.textContent = plainPassword || '(ពុំទាន់មាន)';
+                textEl.classList.remove('tracking-widest');
+                textEl.classList.add('text-amber-700', 'font-semibold');
+                iconEl.classList.remove('fa-eye');
+                iconEl.classList.add('fa-eye-slash', 'text-amber-600');
+            } else {
+                textEl.textContent = '••••••';
+                textEl.classList.add('tracking-widest');
+                textEl.classList.remove('text-amber-700', 'font-semibold');
+                iconEl.classList.remove('fa-eye-slash', 'text-amber-600');
+                iconEl.classList.add('fa-eye');
+            }
+        }
+
+        function filterUsersTable() {
+            const query = document.getElementById('user-search-input').value.toLowerCase().trim();
+            const roleFilter = document.getElementById('user-role-filter').value;
+
+            const filtered = allUsersData.filter(user => {
+                const matchQuery = !query ||
+                    (user.fullname && user.fullname.toLowerCase().includes(query)) ||
+                    (user.username && user.username.toLowerCase().includes(query)) ||
+                    (user.phone && user.phone.includes(query));
+
+                const matchRole = (roleFilter === 'all') || (user.role === roleFilter);
+
+                return matchQuery && matchRole;
+            });
+
+            renderUsersTable(filtered);
+            document.getElementById('users-count-display').textContent = filtered.length;
+        }
+
+        // Open Password Change Modal for specific user
+        function openChangePasswordModal(userId, username, fullname) {
+            clearAlert('pwd-modal-alert');
+            document.getElementById('pwd-user-id').value = userId;
+            document.getElementById('pwd-target-fullname').textContent = fullname || username;
+            document.getElementById('pwd-target-username').textContent = username;
+            document.getElementById('pwd-new-password').value = '';
+            document.getElementById('pwd-confirm-password').value = '';
+            document.getElementById('pwd-new-password').type = 'password';
+            document.getElementById('pwd-toggle-icon').className = 'fa-solid fa-eye';
+            openModal('modal-update-password');
+        }
+
+        async function submitAdminPasswordChange(e) {
+            e.preventDefault();
+            const userId = document.getElementById('pwd-user-id').value;
+            const newPassword = document.getElementById('pwd-new-password').value;
+            const confirmPassword = document.getElementById('pwd-confirm-password').value;
+            const btn = document.getElementById('btn-submit-password');
+            const originalText = btn.innerHTML;
+
+            if (newPassword !== confirmPassword) {
+                showAlert('pwd-modal-alert', 'ពាក្យសម្ងាត់ថ្មីទាំងពីរមិនដូចគ្នាទេ!');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> កំពុងរក្សាទុក...';
+
+            try {
+                const response = await fetch('databeas.php?action=admin_update_password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: userId,
+                        password: newPassword
+                    })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast(result.message || 'ពាក្យសម្ងាត់ត្រូវបានកែប្រែដោយជោគជ័យ!', 'success');
+                    closeModal('modal-update-password');
+                    loadAllUsers();
+                } else {
+                    showAlert('pwd-modal-alert', result.message || 'មិនអាចផ្លាស់ប្តូរពាក្យសម្ងាត់បានទេ!');
+                }
+            } catch (err) {
+                showAlert('pwd-modal-alert', 'មិនអាចភ្ជាប់ទៅកាន់ Server បានទេ!');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        // Open Edit User Info Modal
+        function openEditUserModal(userId, username, fullname, phone, role) {
+            clearAlert('edit-user-modal-alert');
+            document.getElementById('edit-user-id').value = userId;
+            document.getElementById('edit-user-username').value = username;
+            document.getElementById('edit-user-fullname').value = fullname || '';
+            document.getElementById('edit-user-phone').value = phone || '';
+            document.getElementById('edit-user-role').value = role || 'user';
+            openModal('modal-edit-user');
+        }
+
+        async function submitAdminEditUser(e) {
+            e.preventDefault();
+            const userId = document.getElementById('edit-user-id').value;
+            const fullname = document.getElementById('edit-user-fullname').value.trim();
+            const phone = document.getElementById('edit-user-phone').value.trim();
+            const role = document.getElementById('edit-user-role').value;
+            const btn = document.getElementById('btn-submit-edit-user');
+            const originalText = btn.innerHTML;
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> កំពុងកែប្រែ...';
+
+            try {
+                const response = await fetch('databeas.php?action=admin_update_user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: userId,
+                        fullname,
+                        phone,
+                        role
+                    })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast(result.message || 'កែប្រែព័ត៌មានគណនីបានជោគជ័យ!', 'success');
+                    closeModal('modal-edit-user');
+                    loadAllUsers();
+                    refreshDashboardData();
+                } else {
+                    showAlert('edit-user-modal-alert', result.message || 'មិនអាចកែប្រែព័ត៌មានបានទេ!');
+                }
+            } catch (err) {
+                showAlert('edit-user-modal-alert', 'មិនអាចភ្ជាប់ទៅកាន់ Server បានទេ!');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        // Delete User Confirmation
+        async function confirmDeleteUser(userId, username, fullname) {
+            const confirmed = confirm(`តើអ្នកពិតជាចង់លុបគណនី @${username} (${fullname}) មែនឬទេ?\n\nចំណាំ៖ សកម្មភាពនេះមិនអាចត្រឡប់ក្រោយបានទេ!`);
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch('databeas.php?action=admin_delete_user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: userId })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast(result.message || 'គណនីត្រូវបានលុបដោយជោគជ័យ!', 'success');
+                    loadAllUsers();
+                    refreshDashboardData();
+                } else {
+                    alert('កំហុស៖ ' + (result.message || 'មិនអាចលុបគណនីបានទេ!'));
+                }
+            } catch (err) {
+                alert('មិនអាចភ្ជាប់ទៅកាន់ Server បានទេ!');
+            }
+        }
+
+        // Admin Create User Directly
+        async function submitAdminCreateUser(e) {
+            e.preventDefault();
+            const fullname = document.getElementById('create-fullname').value.trim();
+            const username = document.getElementById('create-username').value.trim();
+            const phone = document.getElementById('create-phone').value.trim();
+            const password = document.getElementById('create-password').value;
+            const role = document.getElementById('create-role').value;
+            const btn = document.getElementById('btn-submit-create-user');
+            const originalText = btn.innerHTML;
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> កំពុងបង្កើត...';
+
+            try {
+                const response = await fetch('databeas.php?action=admin_create_user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fullname, username, phone, password, role })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast(result.message || 'បង្កើតគណនីថ្មីដោយជោគជ័យ!', 'success');
+                    closeModal('modal-create-user');
+                    document.getElementById('form-create-user').reset();
+                    loadAllUsers();
+                    refreshDashboardData();
+                } else {
+                    showAlert('create-user-modal-alert', result.message || 'មិនអាចបង្កើតគណនីបានទេ!');
+                }
+            } catch (err) {
+                showAlert('create-user-modal-alert', 'មិនអាចភ្ជាប់ទៅកាន់ Server បានទេ!');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        // Helper string sanitization
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function escapeJs(str) {
+            if (!str) return '';
+            return String(str).replace(/'/g, "\\'").replace(/"/g, '\\"');
+        }
+
+        // Close modal on outside click
+        window.addEventListener('click', function (e) {
+            const modals = ['modal-update-password', 'modal-edit-user', 'modal-create-user', 'modal-login', 'modal-register'];
+            modals.forEach(id => {
+                const el = document.getElementById(id);
+                if (e.target === el) closeModal(id);
+            });
+        });
+
+        // Close on ESC key
+        window.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                const modals = ['modal-update-password', 'modal-edit-user', 'modal-create-user', 'modal-login', 'modal-register'];
+                modals.forEach(id => closeModal(id));
+            }
+        });
+
+        // Initialize on page load
+        window.onload = function () {
+            initAuth();
+            if (currentUser) {
+                refreshDashboardData();
+                if (currentUser.role === 'admin') {
+                    loadAllUsers();
+                }
+            }
+        };
+    </script>
+</body>
+
+</html>

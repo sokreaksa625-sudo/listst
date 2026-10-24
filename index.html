@@ -1,0 +1,2137 @@
+<!DOCTYPE html>
+<html lang="km">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ប្រព័ន្ធគ្រប់គ្រងទិន្នន័យសិស្ស</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Moul&display=swap"
+        rel="stylesheet">
+
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- ប្រើ html2pdf ដើម្បីដោះស្រាយបញ្ហាដាច់ជើងអក្សរខ្មែរ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #fcf9f2;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .khmer-moul {
+            font-family: 'Moul', cursive;
+        }
+
+        .decorative-border {
+            height: 10px;
+            background: repeating-linear-gradient(45deg, #cc2b2b, #cc2b2b 10px, #f2c94c 10px, #f2c94c 20px, #219653 20px, #219653 30px, #2d3748 30px, #2d3748 40px);
+        }
+
+        .top-header {
+            background-color: #2b3a55;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* Table Styling */
+        .kh-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .kh-table th,
+        .kh-table td {
+            border: 1px solid #7cb3f5;
+            padding: 6px 8px;
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .kh-table th {
+            background-color: #a3cbf7;
+            color: #0b4587;
+            font-weight: bold;
+        }
+
+        .kh-table td.text-left {
+            text-align: left;
+        }
+
+        /* Modal styling */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 50;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 550px;
+            border-radius: 8px;
+        }
+
+        .active-filter {
+            background-color: #2563eb !important;
+            color: white !important;
+        }
+
+        .active-room-filter {
+            background-color: #4f46e5 !important;
+            color: white !important;
+        }
+
+        /* Toolbar Action Buttons & Grade Filter Styling */
+        .toolbar-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            font-size: 0.75rem;
+            line-height: 1rem;
+            font-weight: 500;
+            padding: 0.375rem 0.65rem;
+            border-radius: 0.5rem;
+            white-space: nowrap;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+            user-select: none;
+        }
+
+        .toolbar-btn:hover {
+            transform: translateY(-1.5px);
+            box-shadow: 0 4px 10px -1px rgba(0, 0, 0, 0.16), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .toolbar-btn:active {
+            transform: translateY(0) scale(0.97);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .toolbar-btn i {
+            transition: transform 0.25s ease;
+        }
+
+        .btn-action-save:hover i {
+            transform: scale(1.15) rotate(-8deg);
+        }
+
+        .btn-action-sort:hover i {
+            transform: rotate(180deg);
+        }
+
+        .btn-action-excel:hover i {
+            transform: scale(1.18);
+        }
+
+        .btn-action-age:hover i {
+            transform: rotate(60deg);
+        }
+
+        .btn-action-clear:hover i {
+            transform: scale(1.18) rotate(10deg);
+        }
+
+        #grade-filters .filter-btn {
+            font-size: 0.75rem;
+            padding: 0.3rem 0.55rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        #grade-filters .filter-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        #grade-filters .filter-btn:active {
+            transform: translateY(0) scale(0.96);
+        }
+
+        #grade-filters .filter-btn.active-filter {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+            color: #ffffff !important;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35) !important;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col">
+
+    <div class="top-header flex-wrap gap-3">
+        <div class="flex items-center gap-3">
+            <button onclick="window.location.href='../../index.html'"
+                class="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-xs sm:text-sm transition text-white border border-white/20 flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-arrow-left"></i> ត្រឡប់
+            </button>
+            <a href="dashboard.html"
+                class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 px-3 py-1.5 rounded-lg text-xs sm:text-sm transition text-white font-semibold border border-amber-400/30 flex items-center gap-1.5 cursor-pointer shadow-xs">
+                <i class="fa-solid fa-house"></i> ទំព័រដើម Dashboard
+            </a>
+            <h1 class="khmer-moul text-lg sm:text-xl tracking-wider text-white flex items-center">
+                <i class="fa-solid fa-book-open mr-2 text-purple-400"></i>បញ្ជីចុះឈ្មោះសិស្ស
+            </h1>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3">
+            <div
+                class="text-xs sm:text-sm bg-white/10 backdrop-blur-xs px-3 py-1.5 rounded-lg border border-white/15 text-white/90">
+                សិស្សសរុប៖ <span id="total-students-count"
+                    class="font-bold text-yellow-300 text-sm sm:text-base">០</span> នាក់
+            </div>
+
+            <!-- Auth Buttons (when logged out) -->
+            <div id="auth-guest-buttons" class="flex items-center gap-1.5 sm:gap-2">
+                <button onclick="openLoginModal()" id="btn-open-login"
+                    class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium text-xs sm:text-sm py-1.5 px-3 rounded-lg border border-white/20 shadow-xs hover:shadow-md transition-all duration-200 flex items-center gap-1.5 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer">
+                    <i class="fa-solid fa-right-to-bracket text-blue-200"></i> ចូលប្រើ (Log In)
+                </button>
+                <button onclick="openRegisterModal()" id="btn-open-register"
+                    class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-medium text-xs sm:text-sm py-1.5 px-3 rounded-lg border border-white/20 shadow-xs hover:shadow-md transition-all duration-200 flex items-center gap-1.5 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer">
+                    <i class="fa-solid fa-user-plus text-emerald-200"></i> បង្កើតគណនី (Create Account)
+                </button>
+            </div>
+
+            <!-- User Profile badge (when logged in) -->
+            <div id="auth-user-profile" class="hidden flex items-center gap-2">
+                <div
+                    class="flex items-center gap-2 bg-white/15 backdrop-blur-xs px-3 py-1.5 rounded-lg border border-white/20 text-xs sm:text-sm text-white">
+                    <div
+                        class="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold shadow-xs">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <span id="auth-user-name" class="font-semibold text-white tracking-wide">User</span>
+                    <span id="auth-user-role"
+                        class="text-[10px] bg-blue-500/50 text-blue-200 px-1.5 py-0.5 rounded font-bold uppercase">ADMIN</span>
+                </div>
+                <button onclick="handleLogout()"
+                    class="bg-red-500/80 hover:bg-red-600 text-white font-medium text-xs sm:text-sm py-1.5 px-3 rounded-lg border border-red-400/30 shadow-xs hover:shadow-md transition-all duration-200 flex items-center gap-1.5 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+                    title="ចាកចេញពីគណនី">
+                    <i class="fa-solid fa-right-from-bracket"></i> ចាកចេញ
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="decorative-border w-full"></div>
+
+    <div class="container mx-auto px-2 md:px-4 py-6 flex-grow max-w-[1400px]">
+
+        <div class="card border-t-4 border-t-indigo-600 relative overflow-hidden">
+            <div
+                class="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-indigo-50 opacity-50 pointer-events-none">
+            </div>
+            <h2 class="text-xl font-bold mb-4 text-gray-700 border-b pb-2">ទម្រង់ចុះឈ្មោះសិស្សថ្មី</h2>
+
+            <form id="student-form" class="space-y-4">
+                <div class="grid grid-cols-2 md:grid-cols-6 gap-3 items-end bg-gray-50 p-3 rounded-lg border">
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">អត្តលេខ <span
+                                class="text-red-500">*</span></label>
+                        <input type="text" id="studentId" required placeholder="ឧ. ST1001"
+                            class="w-full border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">គោត្តនាម និង នាម <span
+                                class="text-red-500">*</span></label>
+                        <input type="text" id="fullname" required placeholder="ឧ. សុខ សាន្ត"
+                            class="w-full border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm">
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">ភេទ <span
+                                class="text-red-500">*</span></label>
+                        <select id="gender" required
+                            class="w-full border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-sm">
+                            <option value="ប្រុស">ប្រុស</option>
+                            <option value="ស្រី">ស្រី</option>
+                        </select>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">ថ្ងៃខែឆ្នាំកំណើត <span
+                                class="text-red-500">*</span></label>
+                        <input type="date" id="dob" required
+                            class="w-full border border-gray-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm text-center">
+                    </div>
+                    <div class="col-span-1 flex gap-2">
+                        <div class="w-1/2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">ថ្នាក់ <span
+                                    class="text-red-500">*</span></label>
+                            <select id="grade" required
+                                class="w-full border border-gray-300 rounded-md px-1 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-center text-sm">
+                                <option value="ទី១">ទី១</option>
+                                <option value="ទី២">ទី២</option>
+                                <option value="ទី៣">ទី៣</option>
+                                <option value="ទី៤">ទី៤</option>
+                                <option value="ទី៥">ទី៥</option>
+                                <option value="ទី៦">ទី៦</option>
+                            </select>
+                        </div>
+                        <div class="w-1/2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">បន្ទប់ <span
+                                    class="text-red-500">*</span></label>
+                            <select id="room" required
+                                class="w-full border border-gray-300 rounded-md px-1 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-center text-sm">
+                                <option value="ក">ក</option>
+                                <option value="ខ">ខ</option>
+                                <option value="គ">គ</option>
+                                <option value="ឃ">ឃ</option>
+                                <option value="ង">ង</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                        <h3 class="text-sm font-bold text-yellow-800 mb-2 border-b border-yellow-200 pb-1">ទីកន្លែងកំណើត
+                        </h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="pob_village" placeholder="ភូមិ"
+                                class="border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-yellow-400">
+                            <input type="text" id="pob_commune" placeholder="ឃុំ/សង្កាត់"
+                                class="border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-yellow-400">
+                            <input type="text" id="pob_district" placeholder="ស្រុក/ខណ្ឌ"
+                                class="border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-yellow-400">
+                            <input type="text" id="pob_province" placeholder="ខេត្ត/ក្រុង"
+                                class="border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-yellow-400">
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                        <h3 class="text-sm font-bold text-blue-800 mb-2 border-b border-blue-200 pb-1">
+                            អាស័យដ្ឋានបច្ចុប្បន្ន</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="curr_village" placeholder="ភូមិ"
+                                class="border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-blue-400">
+                            <input type="text" id="curr_commune" placeholder="ឃុំ/សង្កាត់"
+                                class="border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-blue-400">
+                            <input type="text" id="curr_district" placeholder="ស្រុក/ខណ្ឌ"
+                                class="border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-blue-400">
+                            <input type="text" id="curr_province" placeholder="ខេត្ត/ក្រុង"
+                                class="border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-blue-400">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-green-50 p-3 rounded-lg border border-green-200">
+                        <h3 class="text-sm font-bold text-green-800 mb-2 border-b border-green-200 pb-1">ព័ត៌មានឪពុក
+                        </h3>
+                        <div class="grid grid-cols-3 gap-2">
+                            <input type="text" id="father_name" placeholder="ឈ្មោះឪពុក"
+                                class="border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-green-400">
+                            <select id="father_status"
+                                class="border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-green-400 bg-white">
+                                <option value="">ស្ថានភាព</option>
+                                <option value="រស់">រស់</option>
+                                <option value="ស្លាប់">ស្លាប់</option>
+                            </select>
+                            <input type="text" id="father_job" placeholder="មុខរបរ"
+                                class="border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-green-400">
+                        </div>
+                    </div>
+                    <div class="bg-pink-50 p-3 rounded-lg border border-pink-200">
+                        <h3 class="text-sm font-bold text-pink-800 mb-2 border-b border-pink-200 pb-1">ព័ត៌មានម្តាយ និង
+                            ផ្សេងៗ</h3>
+                        <div class="grid grid-cols-6 gap-2">
+                            <input type="text" id="mother_name" placeholder="ឈ្មោះម្តាយ"
+                                class="col-span-2 border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-pink-400">
+                            <select id="mother_status"
+                                class="col-span-2 border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-pink-400 bg-white">
+                                <option value="">ស្ថានភាព</option>
+                                <option value="រស់">រស់</option>
+                                <option value="ស្លាប់">ស្លាប់</option>
+                            </select>
+                            <input type="text" id="mother_job" placeholder="មុខរបរ"
+                                class="col-span-2 border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-pink-400">
+
+                            <div class="col-span-6 flex items-center gap-2 mt-1">
+                                <label class="text-xs text-gray-700 whitespace-nowrap">ជនជាតិ/សាសនា:</label>
+                                <input type="text" id="ethnicity_religion" value="ខ្មែរ/ព្រះពុទ្ធ"
+                                    class="w-full border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-pink-400">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 flex justify-end">
+                    <button type="submit"
+                        class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-8 rounded-lg shadow-md transition duration-200 flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> បន្ថែមសិស្ស
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div
+            class="bg-gradient-to-r from-orange-50 via-amber-50 to-orange-100/90 p-2 sm:p-2.5 rounded-t-xl mt-6 border border-b-2 border-orange-300 shadow-sm flex flex-col xl:flex-row justify-between items-start xl:items-center gap-2.5">
+            <div class="flex flex-col gap-1.5 w-full xl:w-auto">
+                <div class="bg-white/85 backdrop-blur-xs p-1 rounded-lg border border-orange-200/80 shadow-xs flex items-center gap-1 flex-nowrap overflow-x-auto max-w-full"
+                    id="grade-filters">
+                    <button onclick="filterStudents('all', 'all')" id="btn-filter-all"
+                        class="filter-btn active-filter bg-blue-600 hover:bg-blue-700 text-white">
+                        <i class="fa-solid fa-users mr-1"></i> សិស្សទាំងអស់
+                    </button>
+                    <button onclick="filterStudents('ទី១', 'all')" id="btn-filter-ទី១"
+                        class="filter-btn bg-gray-500 hover:bg-blue-600 text-white">ទី១</button>
+                    <button onclick="filterStudents('ទី២', 'all')" id="btn-filter-ទី២"
+                        class="filter-btn bg-gray-500 hover:bg-blue-600 text-white">ទី២</button>
+                    <button onclick="filterStudents('ទី៣', 'all')" id="btn-filter-ទី៣"
+                        class="filter-btn bg-gray-500 hover:bg-blue-600 text-white">ទី៣</button>
+                    <button onclick="filterStudents('ទី៤', 'all')" id="btn-filter-ទី៤"
+                        class="filter-btn bg-gray-500 hover:bg-blue-600 text-white">ទី៤</button>
+                    <button onclick="filterStudents('ទី៥', 'all')" id="btn-filter-ទី៥"
+                        class="filter-btn bg-gray-500 hover:bg-blue-600 text-white">ទី៥</button>
+                    <button onclick="filterStudents('ទី៦', 'all')" id="btn-filter-ទី៦"
+                        class="filter-btn bg-gray-500 hover:bg-blue-600 text-white">ទី៦</button>
+                </div>
+                <div class="flex items-center gap-1 flex-wrap hidden transition-all duration-300" id="room-filters">
+                </div>
+            </div>
+
+            <div
+                class="flex items-center gap-1.5 flex-nowrap w-full xl:w-auto justify-start xl:justify-end overflow-x-auto pb-0.5 xl:pb-0">
+
+                <!-- ប៊ូតុងរក្សាទុកទិន្នន័យទៅ Database -->
+                <button onclick="saveDataToDatabase()" id="btn-save-db"
+                    class="toolbar-btn btn-action-save bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white">
+                    <i class="fa-solid fa-floppy-disk"></i> រក្សាទុកទិន្នន័យ
+                </button>
+
+                <!-- ប៊ូតុងតម្រៀបឈ្មោះ -->
+                <button onclick="toggleNameSort()" id="btn-sort-name"
+                    class="toolbar-btn btn-action-sort bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white">
+                    <i class="fa-solid fa-arrow-down-a-z"></i> តម្រៀបឈ្មោះ (ក-អ)
+                </button>
+
+                <button onclick="openExportModal('excel')"
+                    class="toolbar-btn btn-action-excel bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white">
+                    <i class="fa-solid fa-file-excel"></i> បញ្ចេញពី Excel
+                </button>
+                <div class="relative group inline-block">
+                    <button
+                        class="toolbar-btn btn-action-age bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white">
+                        <i class="fa-solid fa-gear"></i> កំណត់អាយុ
+                    </button>
+                    <div
+                        class="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-xl z-20 hidden group-hover:block p-3 border border-gray-200">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">គិតអាយុត្រឹមថ្ងៃទី៖</label>
+                        <input type="date" id="base-date" class="w-full border rounded p-1 mb-2 text-sm"
+                            onchange="recalculateAges()">
+                        <p class="text-xs text-gray-500">ជ្រើសរើសថ្ងៃគោលដើម្បីគណនាអាយុឡើងវិញ។</p>
+                    </div>
+                </div>
+                <button onclick="clearAllData()"
+                    class="toolbar-btn btn-action-clear bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white">
+                    <i class="fa-solid fa-trash"></i> សម្អាតទិន្នន័យទាំងអស់
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white p-2 rounded-b-xl shadow-lg overflow-x-auto border-x border-b border-red-500">
+            <h2 id="table-title" class="khmer-moul text-center text-xl md:text-2xl text-blue-900 my-4">បញ្ជីរាយនាមសិស្ស
+                (សិស្សទាំងអស់)</h2>
+            <div class="flex justify-end text-sm text-red-600 font-bold mb-2 pr-4">
+                សិស្សសរុប៖&nbsp;<span id="current-view-count">០</span>&nbsp;នាក់,&nbsp;ស្រី៖&nbsp;<span
+                    id="current-view-female-count">០</span>&nbsp;នាក់
+            </div>
+
+            <table class="kh-table">
+                <thead>
+                    <tr>
+                        <th rowspan="2" class="w-10">ល.រ</th>
+                        <th rowspan="2" class="w-20">អត្តលេខ</th>
+                        <th rowspan="2">គោត្តនាម នាម</th>
+                        <th rowspan="2" class="w-12">ភេទ</th>
+                        <th rowspan="2" class="w-20">ថ្នាក់</th>
+                        <th rowspan="2" class="w-24">ថ្ងៃខែឆ្នាំកំណើត</th>
+                        <th rowspan="2" class="w-12">អាយុ</th>
+                        <th colspan="4">ទីកន្លែងកំណើត</th>
+                        <th colspan="3">ឈ្មោះឪពុក និង មុខរបរ</th>
+                        <th colspan="3">ឈ្មោះម្តាយ និង មុខរបរ</th>
+                        <th colspan="4">អាស័យដ្ឋានបច្ចុប្បន្ន</th>
+                        <th rowspan="2" class="w-24">ជនជាតិ/សាសនា</th>
+                        <th rowspan="2" class="w-16">សកម្មភាព</th>
+                    </tr>
+                    <tr>
+                        <th class="w-20">ភូមិ</th>
+                        <th class="w-20">ឃុំ/សង្កាត់</th>
+                        <th class="w-20">ស្រុក/ខណ្ឌ</th>
+                        <th class="w-20">ខេត្ត/ក្រុង</th>
+                        <th class="w-24">គោត្តនាម នាម</th>
+                        <th class="w-16">រស់/ស្លាប់</th>
+                        <th class="w-20">មុខរបរ</th>
+                        <th class="w-24">គោត្តនាម នាម</th>
+                        <th class="w-16">រស់/ស្លាប់</th>
+                        <th class="w-20">មុខរបរ</th>
+                        <th class="w-20">ភូមិ</th>
+                        <th class="w-20">ឃុំ/សង្កាត់</th>
+                        <th class="w-20">ស្រុក/ខណ្ឌ</th>
+                        <th class="w-20">ខេត្ត/ក្រុង</th>
+                    </tr>
+                    <tr class="bg-gray-100 text-gray-500 text-xs">
+                        <td></td>
+                        <td>1</td>
+                        <td>2</td>
+                        <td>3</td>
+                        <td>4</td>
+                        <td>5</td>
+                        <td>6</td>
+                        <td>7</td>
+                        <td>8</td>
+                        <td>9</td>
+                        <td>10</td>
+                        <td>11</td>
+                        <td>12</td>
+                        <td>13</td>
+                        <td>14</td>
+                        <td>15</td>
+                        <td>16</td>
+                        <td>17</td>
+                        <td>18</td>
+                        <td>19</td>
+                        <td>20</td>
+                        <td>21</td>
+                        <td>22</td>
+                    </tr>
+                </thead>
+                <tbody id="student-table-body">
+                    <!-- Data here -->
+                </tbody>
+            </table>
+            <div id="empty-state" class="text-center py-10 text-gray-500 hidden">
+                <i class="fa-solid fa-folder-open text-4xl mb-3 text-gray-300"></i>
+                <p>មិនមានទិន្នន័យសិស្សនៅឡើយទេ</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="export-modal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-lg font-bold mb-4" id="export-modal-title">ទាញយកឯកសារ</h3>
+            <p class="mb-3 text-gray-700 font-medium">១. សូមជ្រើសរើសកម្រិតថ្នាក់៖</p>
+            <div class="grid grid-cols-4 gap-2 mb-4" id="export-grade-options">
+                <button
+                    class="export-grade-btn bg-indigo-600 text-white border border-gray-300 rounded p-2 text-center text-sm"
+                    data-grade="all">ទាំងអស់</button>
+                <button
+                    class="export-grade-btn bg-gray-100 hover:bg-blue-50 border border-gray-300 rounded p-2 text-center text-sm"
+                    data-grade="ទី១">ថ្នាក់ទី១</button>
+                <button
+                    class="export-grade-btn bg-gray-100 hover:bg-blue-50 border border-gray-300 rounded p-2 text-center text-sm"
+                    data-grade="ទី២">ថ្នាក់ទី២</button>
+                <button
+                    class="export-grade-btn bg-gray-100 hover:bg-blue-50 border border-gray-300 rounded p-2 text-center text-sm"
+                    data-grade="ទី៣">ថ្នាក់ទី៣</button>
+                <button
+                    class="export-grade-btn bg-gray-100 hover:bg-blue-50 border border-gray-300 rounded p-2 text-center text-sm"
+                    data-grade="ទី៤">ថ្នាក់ទី៤</button>
+                <button
+                    class="export-grade-btn bg-gray-100 hover:bg-blue-50 border border-gray-300 rounded p-2 text-center text-sm"
+                    data-grade="ទី៥">ថ្នាក់ទី៥</button>
+                <button
+                    class="export-grade-btn bg-gray-100 hover:bg-blue-50 border border-gray-300 rounded p-2 text-center text-sm"
+                    data-grade="ទី៦">ថ្នាក់ទី៦</button>
+            </div>
+
+            <div id="export-room-options-container" class="hidden mb-4 border-t pt-3 mt-2">
+                <p class="mb-3 text-gray-700 font-medium">២. ជ្រើសរើសបន្ទប់ (ក, ខ, គ...)៖</p>
+                <div class="flex flex-wrap gap-2" id="export-room-options">
+                    <!-- Dynamic rooms will be placed here -->
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-6 border-t pt-4">
+                <button onclick="closeExportModal()"
+                    class="bg-gray-300 hover:bg-gray-400 px-5 py-2 rounded text-gray-800 font-medium">បោះបង់</button>
+                <button id="confirm-export-btn"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded shadow font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-download"></i> ទាញយក
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="message-box" class="modal">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div id="message-icon" class="text-5xl mb-3"></div>
+            <h3 id="message-title" class="text-xl font-bold mb-2 text-gray-800"></h3>
+            <p id="message-text" class="text-gray-600 mb-6"></p>
+            <button onclick="closeMessageBox()"
+                class="bg-indigo-600 text-white px-8 py-2 rounded-lg hover:bg-indigo-700 font-medium shadow-md">យល់ព្រម</button>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal">
+        <div
+            class="modal-content relative !p-6 !max-w-md bg-white rounded-2xl shadow-2xl border border-gray-100 !my-6 sm:!my-8 max-h-[92vh] overflow-y-auto">
+            <button onclick="closeLoginModal()"
+                class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition cursor-pointer">
+                &times;
+            </button>
+
+            <div class="flex items-center gap-3 mb-5 pb-3 border-b border-gray-100">
+                <div
+                    class="w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white text-lg shadow-md">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">ចូលប្រើប្រព័ន្ធ (Log In)</h3>
+                    <p class="text-xs text-gray-500">បញ្ចូលឈ្មោះអ្នកប្រើ ឬ លេខទូរស័ព្ទ ដើម្បីបន្ត</p>
+                </div>
+            </div>
+
+            <div id="login-alert" class="hidden mb-4 p-3 rounded-lg text-xs font-medium"></div>
+
+            <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">ឈ្មោះអ្នកប្រើ ឬ លេខទូរស័ព្ទ <span
+                            class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <span
+                            class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 text-sm">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input type="text" id="login-username" required placeholder="ឧ. admin ឬ 012345678"
+                            class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition bg-gray-50/50 focus:bg-white">
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label class="block text-xs font-semibold text-gray-700">ពាក្យសម្ងាត់ <span
+                                class="text-red-500">*</span></label>
+                        <a href="javascript:void(0)" onclick="openForgotPasswordModal()"
+                            class="text-xs text-blue-600 hover:underline">ភ្លេចពាក្យសម្ងាត់?</a>
+                    </div>
+                    <div class="relative">
+                        <span
+                            class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 text-sm">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input type="password" id="login-password" required placeholder="••••••••"
+                            class="w-full pl-9 pr-10 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition bg-gray-50/50 focus:bg-white">
+                        <button type="button" onclick="togglePasswordVisibility('login-password', 'login-pwd-icon')"
+                            class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 cursor-pointer">
+                            <i id="login-pwd-icon" class="fa-solid fa-eye text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between text-xs text-gray-600">
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" id="login-remember" class="rounded text-blue-600 focus:ring-blue-400">
+                        <span>ចងចាំខ្ញុំ</span>
+                    </label>
+                    <span class="text-gray-400">គណនីគំរូ: <strong class="text-gray-600">admin / admin123
+                            (012345678)</strong></span>
+                </div>
+
+                <button type="submit" id="btn-submit-login"
+                    class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md transition duration-200 flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-right-to-bracket"></i> ចូលប្រើ (Log In)
+                </button>
+            </form>
+
+            <div class="mt-5 pt-4 border-t border-gray-100 text-center text-xs text-gray-600">
+                មិនទាន់មានគណនីមែនទេ?
+                <button type="button" onclick="switchToRegisterModal()"
+                    class="text-blue-600 font-semibold hover:underline ml-1 cursor-pointer">
+                    បង្កើតគណនីថ្មីនៅទីនេះ (Create Account)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="register-modal" class="modal">
+        <div
+            class="modal-content relative !p-6 !max-w-md bg-white rounded-2xl shadow-2xl border border-gray-100 !my-6 sm:!my-8 max-h-[92vh] overflow-y-auto">
+            <button onclick="closeRegisterModal()"
+                class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition cursor-pointer">
+                &times;
+            </button>
+
+            <div class="flex items-center gap-3 mb-5 pb-3 border-b border-gray-100">
+                <div
+                    class="w-11 h-11 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-600 flex items-center justify-center text-white text-lg shadow-md">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">បង្កើតគណនីថ្មី (Create Account)</h3>
+                    <p class="text-xs text-gray-500">ចុះឈ្មោះគណនីដើម្បីគ្រប់គ្រងប្រព័ន្ធ</p>
+                </div>
+            </div>
+
+            <div id="register-alert" class="hidden mb-4 p-3 rounded-lg text-xs font-medium"></div>
+
+            <form id="register-form" onsubmit="handleRegister(event)" class="space-y-3.5">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">ឈ្មោះពេញ <span
+                            class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <span
+                            class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 text-sm">
+                            <i class="fa-solid fa-id-card"></i>
+                        </span>
+                        <input type="text" id="reg-fullname" required placeholder="ឧ. សុខ ចិន្តា"
+                            class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none transition bg-gray-50/50 focus:bg-white">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">ឈ្មោះអ្នកប្រើ (Username) <span
+                            class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <span
+                            class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 text-sm">
+                            <i class="fa-solid fa-at"></i>
+                        </span>
+                        <input type="text" id="reg-username" required placeholder="ឧ. chenda_sok" minlength="3"
+                            class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none transition bg-gray-50/50 focus:bg-white">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">លេខទូរស័ព្ទ (Phone Number) <span
+                            class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <span
+                            class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 text-sm">
+                            <i class="fa-solid fa-phone"></i>
+                        </span>
+                        <input type="tel" id="reg-phone" required placeholder="ឧ. 012 345 678"
+                            class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none transition bg-gray-50/50 focus:bg-white">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">ពាក្យសម្ងាត់ <span
+                            class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <span
+                            class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 text-sm">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input type="password" id="reg-password" required placeholder="យ៉ាងតិច ៤ តួអក្សរ" minlength="4"
+                            class="w-full pl-9 pr-10 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none transition bg-gray-50/50 focus:bg-white">
+                        <button type="button" onclick="togglePasswordVisibility('reg-password', 'reg-pwd-icon')"
+                            class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 cursor-pointer">
+                            <i id="reg-pwd-icon" class="fa-solid fa-eye text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">បញ្ជាក់ពាក្យសម្ងាត់ <span
+                            class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <span
+                            class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 text-sm">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </span>
+                        <input type="password" id="reg-confirm-password" required
+                            placeholder="បញ្ចូលពាក្យសម្ងាត់ម្តងទៀត" minlength="4"
+                            class="w-full pl-9 pr-10 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none transition bg-gray-50/50 focus:bg-white">
+                    </div>
+                </div>
+
+                <button type="submit" id="btn-submit-register"
+                    class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md transition duration-200 flex items-center justify-center gap-2 cursor-pointer mt-2">
+                    <i class="fa-solid fa-user-plus"></i> បង្កើតគណនី (Create Account)
+                </button>
+            </form>
+
+            <div class="mt-5 pt-4 border-t border-gray-100 text-center text-xs text-gray-600">
+                មានគណនីរួចហើយមែនទេ?
+                <button type="button" onclick="switchToLoginModal()"
+                    class="text-emerald-600 font-semibold hover:underline ml-1 cursor-pointer">
+                    ចូលប្រើនៅទីនេះ (Log In)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgot-modal" class="modal">
+        <div
+            class="modal-content relative !p-6 !max-w-md bg-white rounded-2xl shadow-2xl border border-gray-100 !my-6 sm:!my-8 max-h-[92vh] overflow-y-auto">
+            <button onclick="closeForgotPasswordModal()"
+                class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition cursor-pointer">
+                &times;
+            </button>
+
+            <div class="flex items-center gap-3 mb-5 pb-3 border-b border-gray-100">
+                <div
+                    class="w-11 h-11 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-white text-lg shadow-md">
+                    <i class="fa-solid fa-key"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">ស្វែងរកពាក្យសម្ងាត់ (Reset Password)</h3>
+                    <p class="text-xs text-gray-500">ប្រើលេខទូរស័ព្ទដើម្បីកំណត់ពាក្យសម្ងាត់ថ្មី</p>
+                </div>
+            </div>
+
+            <div id="forgot-alert" class="hidden mb-4 p-3 rounded-lg text-xs font-medium"></div>
+
+            <form id="forgot-form" onsubmit="handleForgotPassword(event)" class="space-y-3.5">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">លេខទូរស័ព្ទដែលបានចុះឈ្មោះ <span
+                            class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <span
+                            class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 text-sm">
+                            <i class="fa-solid fa-phone"></i>
+                        </span>
+                        <input type="tel" id="forgot-phone" required placeholder="ឧ. 012 345 678"
+                            class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none transition bg-gray-50/50 focus:bg-white">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">ពាក្យសម្ងាត់ថ្មី <span
+                            class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <span
+                            class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 text-sm">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input type="password" id="forgot-new-password" required placeholder="យ៉ាងតិច ៤ តួអក្សរ"
+                            minlength="4"
+                            class="w-full pl-9 pr-10 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none transition bg-gray-50/50 focus:bg-white">
+                        <button type="button"
+                            onclick="togglePasswordVisibility('forgot-new-password', 'forgot-pwd-icon')"
+                            class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 cursor-pointer">
+                            <i id="forgot-pwd-icon" class="fa-solid fa-eye text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">បញ្ជាក់ពាក្យសម្ងាត់ថ្មី <span
+                            class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <span
+                            class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 text-sm">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </span>
+                        <input type="password" id="forgot-confirm-password" required
+                            placeholder="បញ្ចូលពាក្យសម្ងាត់ថ្មីម្តងទៀត" minlength="4"
+                            class="w-full pl-9 pr-10 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none transition bg-gray-50/50 focus:bg-white">
+                    </div>
+                </div>
+
+                <button type="submit" id="btn-submit-forgot"
+                    class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md transition duration-200 flex items-center justify-center gap-2 cursor-pointer mt-2">
+                    <i class="fa-solid fa-rotate-right"></i> កំណត់ពាក្យសម្ងាត់ថ្មី (Reset Password)
+                </button>
+            </form>
+
+            <div class="mt-5 pt-4 border-t border-gray-100 text-center text-xs text-gray-600">
+                ចងចាំពាក្យសម្ងាត់បានវិញហើយ?
+                <button type="button" onclick="switchToLoginFromForgot()"
+                    class="text-amber-600 font-semibold hover:underline ml-1 cursor-pointer">
+                    ចូលប្រើនៅទីនេះ (Log In)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Student Modal -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+            <h3 class="text-xl font-bold mb-4 text-gray-700 border-b pb-2">កែប្រែព័ត៌មានសិស្ស</h3>
+
+            <form id="edit-form" class="space-y-4">
+                <input type="hidden" id="edit-id">
+                <div class="grid grid-cols-2 md:grid-cols-6 gap-3 items-end bg-gray-50 p-3 rounded-lg border">
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">អត្តលេខ <span
+                                class="text-red-500">*</span></label>
+                        <input type="text" id="edit-studentId" required
+                            class="w-full border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">គោត្តនាម និង នាម <span
+                                class="text-red-500">*</span></label>
+                        <input type="text" id="edit-fullname" required
+                            class="w-full border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm">
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">ភេទ <span
+                                class="text-red-500">*</span></label>
+                        <select id="edit-gender" required
+                            class="w-full border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-sm">
+                            <option value="ប្រុស">ប្រុស</option>
+                            <option value="ស្រី">ស្រី</option>
+                        </select>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">ថ្ងៃខែឆ្នាំកំណើត <span
+                                class="text-red-500">*</span></label>
+                        <input type="date" id="edit-dob" required
+                            class="w-full border border-gray-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm text-center">
+                    </div>
+                    <div class="col-span-1 flex gap-2">
+                        <div class="w-1/2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">ថ្នាក់ <span
+                                    class="text-red-500">*</span></label>
+                            <select id="edit-grade" required
+                                class="w-full border border-gray-300 rounded-md px-1 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-center text-sm">
+                                <option value="ទី១">ទី១</option>
+                                <option value="ទី២">ទី២</option>
+                                <option value="ទី៣">ទី៣</option>
+                                <option value="ទី៤">ទី៤</option>
+                                <option value="ទី៥">ទី៥</option>
+                                <option value="ទី៦">ទី៦</option>
+                            </select>
+                        </div>
+                        <div class="w-1/2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">បន្ទប់ <span
+                                    class="text-red-500">*</span></label>
+                            <select id="edit-room" required
+                                class="w-full border border-gray-300 rounded-md px-1 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-center text-sm">
+                                <option value="ក">ក</option>
+                                <option value="ខ">ខ</option>
+                                <option value="គ">គ</option>
+                                <option value="ឃ">ឃ</option>
+                                <option value="ង">ង</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                        <h3 class="text-sm font-bold text-yellow-800 mb-2 border-b border-yellow-200 pb-1">ទីកន្លែងកំណើត
+                        </h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="edit-pob_village" placeholder="ភូមិ"
+                                class="border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-yellow-400">
+                            <input type="text" id="edit-pob_commune" placeholder="ឃុំ/សង្កាត់"
+                                class="border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-yellow-400">
+                            <input type="text" id="edit-pob_district" placeholder="ស្រុក/ខណ្ឌ"
+                                class="border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-yellow-400">
+                            <input type="text" id="edit-pob_province" placeholder="ខេត្ត/ក្រុង"
+                                class="border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-yellow-400">
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                        <h3 class="text-sm font-bold text-blue-800 mb-2 border-b border-blue-200 pb-1">
+                            អាស័យដ្ឋានបច្ចុប្បន្ន</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="edit-curr_village" placeholder="ភូមិ"
+                                class="border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-blue-400">
+                            <input type="text" id="edit-curr_commune" placeholder="ឃុំ/សង្កាត់"
+                                class="border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-blue-400">
+                            <input type="text" id="edit-curr_district" placeholder="ស្រុក/ខណ្ឌ"
+                                class="border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-blue-400">
+                            <input type="text" id="edit-curr_province" placeholder="ខេត្ត/ក្រុង"
+                                class="border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-blue-400">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-green-50 p-3 rounded-lg border border-green-200">
+                        <h3 class="text-sm font-bold text-green-800 mb-2 border-b border-green-200 pb-1">ព័ត៌មានឪពុក
+                        </h3>
+                        <div class="grid grid-cols-3 gap-2">
+                            <input type="text" id="edit-father_name" placeholder="ឈ្មោះឪពុក"
+                                class="border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-green-400">
+                            <select id="edit-father_status"
+                                class="border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-green-400 bg-white">
+                                <option value="">ស្ថានភាព</option>
+                                <option value="រស់">រស់</option>
+                                <option value="ស្លាប់">ស្លាប់</option>
+                            </select>
+                            <input type="text" id="edit-father_job" placeholder="មុខរបរ"
+                                class="border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-green-400">
+                        </div>
+                    </div>
+                    <div class="bg-pink-50 p-3 rounded-lg border border-pink-200">
+                        <h3 class="text-sm font-bold text-pink-800 mb-2 border-b border-pink-200 pb-1">ព័ត៌មានម្តាយ និង
+                            ផ្សេងៗ</h3>
+                        <div class="grid grid-cols-6 gap-2">
+                            <input type="text" id="edit-mother_name" placeholder="ឈ្មោះម្តាយ"
+                                class="col-span-2 border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-pink-400">
+                            <select id="edit-mother_status"
+                                class="col-span-2 border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-pink-400 bg-white">
+                                <option value="">ស្ថានភាព</option>
+                                <option value="រស់">រស់</option>
+                                <option value="ស្លាប់">ស្លាប់</option>
+                            </select>
+                            <input type="text" id="edit-mother_job" placeholder="មុខរបរ"
+                                class="col-span-2 border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-pink-400">
+
+                            <div class="col-span-6 flex items-center gap-2 mt-1">
+                                <label class="text-xs text-gray-700 whitespace-nowrap">ជនជាតិ/សាសនា:</label>
+                                <input type="text" id="edit-ethnicity_religion"
+                                    class="w-full border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:ring-pink-400">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 flex justify-end gap-3">
+                    <button type="button" onclick="closeEditModal()"
+                        class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-lg shadow-md transition duration-200">បោះបង់</button>
+                    <button type="submit"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-200 flex items-center gap-2">
+                        <i class="fa-solid fa-save"></i> រក្សាទុកការកែប្រែ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let students = [];
+        let currentFilterGrade = 'all';
+        let currentFilterRoom = 'all';
+        let exportType = '';
+        let selectedExportGrade = 'all';
+        let selectedExportRoom = 'all';
+        let baseDateForAge = new Date();
+        let sortDirection = 'asc'; // 'asc' or 'desc'
+
+        document.getElementById('base-date').valueAsDate = baseDateForAge;
+
+        function generateSampleData() {
+            addStudent({ id: '1', studentId: 'ST1002', fullname: 'ចាន់ មករា', gender: 'ប្រុស', dob: '2017-04-19', grade: 'ទី១', room: 'ក', pob_village: '', pob_commune: '', pob_district: '', pob_province: '', father_name: '', father_status: '', father_job: '', mother_name: '', mother_status: '', mother_job: '', curr_village: '', curr_commune: '', curr_district: '', curr_province: '', ethnicity_religion: 'ខ្មែរ/ព្រះពុទ្ធ' }, false);
+            addStudent({ id: '2', studentId: 'ST1000', fullname: 'សុខ សាន្ត', gender: 'ប្រុស', dob: '2015-01-12', grade: 'ទី១', room: 'ក', pob_village: '', pob_commune: '', pob_district: '', pob_province: '', father_name: '', father_status: '', father_job: '', mother_name: '', mother_status: '', mother_job: '', curr_village: '', curr_commune: '', curr_district: '', curr_province: '', ethnicity_religion: 'ខ្មែរ/ព្រះពុទ្ធ' }, false);
+            addStudent({ id: '3', studentId: 'ST1001', fullname: 'មាស ស្រីរ័ត្ន', gender: 'ស្រី', dob: '2016-04-05', grade: 'ទី២', room: 'ខ', pob_village: '', pob_commune: '', pob_district: '', pob_province: '', father_name: '', father_status: '', father_job: '', mother_name: '', mother_status: '', mother_job: '', curr_village: '', curr_commune: '', curr_district: '', curr_province: '', ethnicity_religion: 'ខ្មែរ/ព្រះពុទ្ធ' }, false);
+            addStudent({ id: '4', studentId: 'ST1003', fullname: 'រិទ្ធី ឧត្តម', gender: 'ប្រុស', dob: '2018-05-12', grade: 'ទី៣', room: 'ក', pob_village: '', pob_commune: '', pob_district: '', pob_province: '', father_name: '', father_status: '', father_job: '', mother_name: '', mother_status: '', mother_job: '', curr_village: '', curr_commune: '', curr_district: '', curr_province: '', ethnicity_religion: 'ខ្មែរ/ព្រះពុទ្ធ' }, false);
+            addStudent({ id: '5', studentId: 'ST1004', fullname: 'សាន ស្រីពៅ', gender: 'ស្រី', dob: '2017-09-17', grade: 'ទី៦', room: 'ក', pob_village: '', pob_commune: '', pob_district: '', pob_province: '', father_name: '', father_status: '', father_job: '', mother_name: '', mother_status: '', mother_job: '', curr_village: '', curr_commune: '', curr_district: '', curr_province: '', ethnicity_religion: 'ខ្មែរ/ព្រះពុទ្ធ' }, false);
+            filterStudents('all', 'all');
+        }
+
+        function toKhmerNum(num) {
+            const khmerNums = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
+            return num.toString().replace(/[0-9]/g, match => khmerNums[match]);
+        }
+
+        function calculateAge(dobString) {
+            if (!dobString) return "";
+            const dob = new Date(dobString);
+            const base = new Date(document.getElementById('base-date').value || new Date());
+            let age = base.getFullYear() - dob.getFullYear();
+            const m = base.getMonth() - dob.getMonth();
+            if (m < 0 || (m === 0 && base.getDate() < dob.getDate())) age--;
+            return age >= 0 ? age : 0;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return "";
+            const parts = dateString.split('-');
+            if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            return dateString;
+        }
+
+        function generateId() { return Math.random().toString(36).substr(2, 9); }
+
+        // Function សម្រាប់បញ្ជាប៊ូតុងតម្រៀប
+        function toggleNameSort() {
+            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            const btn = document.getElementById('btn-sort-name');
+            if (sortDirection === 'asc') {
+                btn.innerHTML = '<i class="fa-solid fa-arrow-down-a-z"></i> តម្រៀបឈ្មោះ (ក-អ)';
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-arrow-up-z-a"></i> តម្រៀបឈ្មោះ (អ-ក)';
+            }
+            sortData();
+            renderTable();
+        }
+
+        // Function សម្រាប់តម្រៀបទិន្នន័យ
+        function sortData() {
+            students.sort((a, b) => {
+                if (a.grade !== b.grade) return a.grade.localeCompare(b.grade, 'km');
+                if (a.room !== b.room) return a.room.localeCompare(b.room, 'km');
+
+                if (sortDirection === 'asc') {
+                    return a.fullname.localeCompare(b.fullname, 'km');
+                } else {
+                    return b.fullname.localeCompare(a.fullname, 'km');
+                }
+            });
+        }
+
+        // Function សម្រាប់តម្រៀបទិន្នន័យដែលបានច្រាំង
+        function sortFilteredData(filteredStudents) {
+            return filteredStudents.sort((a, b) => {
+                if (sortDirection === 'asc') {
+                    return a.fullname.localeCompare(b.fullname, 'km');
+                } else {
+                    return b.fullname.localeCompare(a.fullname, 'km');
+                }
+            });
+        }
+
+        document.getElementById('student-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const newStudent = {
+                id: generateId(),
+                studentId: document.getElementById('studentId').value,
+                fullname: document.getElementById('fullname').value,
+                gender: document.getElementById('gender').value,
+                dob: document.getElementById('dob').value,
+                grade: document.getElementById('grade').value,
+                room: document.getElementById('room').value,
+                pob_village: document.getElementById('pob_village').value, pob_commune: document.getElementById('pob_commune').value, pob_district: document.getElementById('pob_district').value, pob_province: document.getElementById('pob_province').value,
+                father_name: document.getElementById('father_name').value, father_status: document.getElementById('father_status').value, father_job: document.getElementById('father_job').value,
+                mother_name: document.getElementById('mother_name').value, mother_status: document.getElementById('mother_status').value, mother_job: document.getElementById('mother_job').value,
+                curr_village: document.getElementById('curr_village').value, curr_commune: document.getElementById('curr_commune').value, curr_district: document.getElementById('curr_district').value, curr_province: document.getElementById('curr_province').value,
+                ethnicity_religion: document.getElementById('ethnicity_religion').value
+            };
+
+            addStudent(newStudent, true);
+            this.reset();
+            document.getElementById('ethnicity_religion').value = "ខ្មែរ/ព្រះពុទ្ធ";
+            filterStudents(newStudent.grade, 'all');
+
+            // រក្សាទុកសិស្សថ្មីទៅកាន់ Database
+            fetch('databeas.php?action=add_student', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newStudent)
+            }).catch(err => console.warn("DB add error:", err));
+
+            showMessage("ជោគជ័យ", "ទិន្នន័យសិស្សត្រូវបានបញ្ចូលដោយជោគជ័យ។", "success");
+        });
+
+        function addStudent(student, shouldRender = true) {
+            students.push(student);
+            sortData();
+            if (shouldRender) filterStudents(currentFilterGrade, currentFilterRoom);
+        }
+
+        function deleteStudent(id) {
+            const s = students.find(item => item.id === id);
+            students = students.filter(item => item.id !== id);
+            filterStudents(currentFilterGrade, currentFilterRoom);
+
+            // លុបពី Database
+            fetch('databeas.php?action=delete_student', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id, studentId: s ? s.studentId : id })
+            }).catch(err => console.warn("DB delete error:", err));
+        }
+
+        function clearAllData() {
+            if (students.length === 0) {
+                showMessage("គ្មានទិន្នន័យ", "មិនមានទិន្នន័យសិស្សសម្រាប់លុបទេ។", "info");
+                return;
+            }
+            if (confirm("តើអ្នកប្រាកដជាចង់លុបទិន្នន័យសិស្សទាំងអស់មែនទេ? សកម្មភាពនេះមិនអាចសង្គ្រោះវិញបានទេ។")) {
+                students = [];
+                filterStudents('all', 'all');
+                fetch('databeas.php?action=clear_all').catch(err => console.warn("DB clear error:", err));
+                showMessage("ជោគជ័យ", "ទិន្នន័យសិស្សទាំងអស់ត្រូវបានលុបដោយជោគជ័យ។", "success");
+            }
+        }
+
+        function filterStudents(grade, room) {
+            currentFilterGrade = grade;
+            currentFilterRoom = room;
+
+            document.querySelectorAll('#grade-filters .filter-btn').forEach(btn => {
+                btn.classList.remove('active-filter', 'bg-blue-600');
+                btn.classList.add('bg-gray-500');
+            });
+            const activeGradeBtnId = grade === 'all' ? 'btn-filter-all' : `btn-filter-${grade}`;
+            const activeGradeBtn = document.getElementById(activeGradeBtnId);
+            if (activeGradeBtn) {
+                activeGradeBtn.classList.remove('bg-gray-500');
+                activeGradeBtn.classList.add('active-filter', 'bg-blue-600');
+            }
+
+            const roomFiltersContainer = document.getElementById('room-filters');
+            if (grade !== 'all') {
+                roomFiltersContainer.classList.remove('hidden');
+                generateRoomFilterButtons(grade, room, 'room-filters', (r) => filterStudents(grade, r));
+            } else {
+                roomFiltersContainer.classList.add('hidden');
+            }
+
+            updateTableTitle();
+            renderTable();
+        }
+
+        function generateRoomFilterButtons(grade, activeRoom, containerId, clickCallback, forExport = false) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            const roomsInGrade = [...new Set(students.filter(s => s.grade === grade).map(s => s.room))].sort();
+
+            if (roomsInGrade.length > 0) {
+                const allBtn = document.createElement('button');
+                const baseClass = forExport ? "px-4 py-2 rounded text-sm border font-medium" : "py-1 px-2.5 rounded-md shadow-xs text-xs font-medium transition-all";
+                const activeClass = forExport ? "bg-indigo-600 text-white border-indigo-600" : "bg-indigo-500 text-white shadow-inner";
+                const inactiveClass = forExport ? "bg-gray-100 hover:bg-blue-50 text-gray-700 border-gray-300" : "bg-gray-200 text-gray-700 hover:bg-gray-300";
+
+                allBtn.className = `${baseClass} ${activeRoom === 'all' ? activeClass : inactiveClass}`;
+                allBtn.textContent = 'បន្ទប់ទាំងអស់';
+                allBtn.onclick = () => clickCallback('all');
+                container.appendChild(allBtn);
+
+                roomsInGrade.forEach(room => {
+                    const btn = document.createElement('button');
+                    btn.className = `${baseClass} ${activeRoom === room ? activeClass : inactiveClass}`;
+                    btn.textContent = `បន្ទប់ ${room}`;
+                    btn.onclick = () => clickCallback(room);
+                    container.appendChild(btn);
+                });
+            } else {
+                const noRoom = document.createElement('span');
+                noRoom.className = "text-sm text-gray-500 italic py-1";
+                noRoom.textContent = "មិនមានសិស្សទេ";
+                container.appendChild(noRoom);
+            }
+        }
+
+        function updateTableTitle() {
+            const titleEl = document.getElementById('table-title');
+            if (currentFilterGrade === 'all') {
+                titleEl.textContent = "បញ្ជីរាយនាមសិស្ស (សិស្សទាំងអស់)";
+            } else {
+                let roomText = currentFilterRoom === 'all' ? '' : ` "${currentFilterRoom}"`;
+                titleEl.textContent = `បញ្ជីរាយនាមសិស្ស ថ្នាក់${currentFilterGrade}${roomText}`;
+            }
+        }
+
+        function recalculateAges() {
+            renderTable();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('student-table-body');
+            const emptyState = document.getElementById('empty-state');
+            tbody.innerHTML = '';
+
+            let filteredStudents = students;
+            if (currentFilterGrade !== 'all') {
+                filteredStudents = filteredStudents.filter(s => s.grade === currentFilterGrade);
+                if (currentFilterRoom !== 'all') {
+                    filteredStudents = filteredStudents.filter(s => s.room === currentFilterRoom);
+                }
+            }
+
+            // តម្រៀបទិន្នន័យដែលបានច្រាំងតាមឈ្មោះ
+            filteredStudents = sortFilteredData(filteredStudents);
+
+            document.getElementById('total-students-count').textContent = toKhmerNum(students.length);
+            document.getElementById('current-view-count').textContent = toKhmerNum(filteredStudents.length);
+            document.getElementById('current-view-female-count').textContent = toKhmerNum(filteredStudents.filter(s => s.gender === 'ស្រី').length);
+
+            if (filteredStudents.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            filteredStudents.forEach((student, index) => {
+                const tr = document.createElement('tr');
+                tr.className = index % 2 === 0 ? 'bg-white hover:bg-blue-50 transition-colors' : 'bg-blue-50/30 hover:bg-blue-100 transition-colors';
+                const age = calculateAge(student.dob);
+
+                tr.innerHTML = `
+                    <td class="font-medium">${toKhmerNum(index + 1)}</td>
+                    <td class="text-xs text-gray-600">${student.studentId}</td>
+                    <td class="text-left font-bold text-blue-800 px-3">${student.fullname}</td>
+                    <td>${student.gender}</td>
+                    <td><span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded text-xs">${student.grade} (${student.room})</span></td>
+                    <td>${formatDate(student.dob)}</td>
+                    <td class="font-bold text-red-600">${toKhmerNum(age)}</td>
+                    
+                    <td contenteditable="true" class="bg-yellow-50/50 focus:bg-yellow-100 outline-none" onblur="updateField('${student.id}', 'pob_village', this.innerText)">${student.pob_village}</td>
+                    <td contenteditable="true" class="bg-yellow-50/50 focus:bg-yellow-100 outline-none" onblur="updateField('${student.id}', 'pob_commune', this.innerText)">${student.pob_commune}</td>
+                    <td contenteditable="true" class="bg-yellow-50/50 focus:bg-yellow-100 outline-none" onblur="updateField('${student.id}', 'pob_district', this.innerText)">${student.pob_district}</td>
+                    <td contenteditable="true" class="bg-yellow-50/50 focus:bg-yellow-100 outline-none" onblur="updateField('${student.id}', 'pob_province', this.innerText)">${student.pob_province}</td>
+                    
+                    <td contenteditable="true" class="bg-green-50/50 focus:bg-green-100 text-left px-2 outline-none" onblur="updateField('${student.id}', 'father_name', this.innerText)">${student.father_name}</td>
+                    <td contenteditable="true" class="bg-green-50/50 focus:bg-green-100 outline-none" onblur="updateField('${student.id}', 'father_status', this.innerText)">${student.father_status}</td>
+                    <td contenteditable="true" class="bg-green-50/50 focus:bg-green-100 outline-none" onblur="updateField('${student.id}', 'father_job', this.innerText)">${student.father_job}</td>
+                    
+                    <td contenteditable="true" class="bg-pink-50/50 focus:bg-pink-100 text-left px-2 outline-none" onblur="updateField('${student.id}', 'mother_name', this.innerText)">${student.mother_name}</td>
+                    <td contenteditable="true" class="bg-pink-50/50 focus:bg-pink-100 outline-none" onblur="updateField('${student.id}', 'mother_status', this.innerText)">${student.mother_status}</td>
+                    <td contenteditable="true" class="bg-pink-50/50 focus:bg-pink-100 outline-none" onblur="updateField('${student.id}', 'mother_job', this.innerText)">${student.mother_job}</td>
+                    
+                    <td contenteditable="true" class="bg-blue-50/50 focus:bg-blue-100 outline-none" onblur="updateField('${student.id}', 'curr_village', this.innerText)">${student.curr_village}</td>
+                    <td contenteditable="true" class="bg-blue-50/50 focus:bg-blue-100 outline-none" onblur="updateField('${student.id}', 'curr_commune', this.innerText)">${student.curr_commune}</td>
+                    <td contenteditable="true" class="bg-blue-50/50 focus:bg-blue-100 outline-none" onblur="updateField('${student.id}', 'curr_district', this.innerText)">${student.curr_district}</td>
+                    <td contenteditable="true" class="bg-blue-50/50 focus:bg-blue-100 outline-none" onblur="updateField('${student.id}', 'curr_province', this.innerText)">${student.curr_province}</td>
+                    
+                    <td contenteditable="true" class="focus:bg-gray-100 outline-none" onblur="updateField('${student.id}', 'ethnicity_religion', this.innerText)">${student.ethnicity_religion}</td>
+                    
+                    <td>
+                        <button onclick="editStudent('${student.id}')" class="text-blue-500 hover:text-white hover:bg-blue-500 border border-blue-500 p-1.5 rounded transition mr-1" title="កែប្រែឈ្មោះ">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button onclick="deleteStudent('${student.id}')" class="text-red-500 hover:text-white hover:bg-red-500 border border-red-500 p-1.5 rounded transition" title="លុបសិស្ស">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateField(id, field, value) {
+            const student = students.find(s => s.id === id);
+            if (student) {
+                student[field] = value.trim();
+                // រក្សាទុកក្រឡាដែលបានកែប្រែទៅកាន់ Database ដោយស្វ័យប្រវត្តិ
+                fetch('databeas.php?action=update_field', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: student.id,
+                        studentId: student.studentId,
+                        field: field,
+                        value: value.trim()
+                    })
+                }).catch(err => console.warn("DB inline update error:", err));
+            }
+        }
+
+        function editStudent(id) {
+            const student = students.find(s => s.id === id);
+            if (!student) return;
+
+            // Populate edit form with student data
+            document.getElementById('edit-id').value = student.id;
+            document.getElementById('edit-studentId').value = student.studentId;
+            document.getElementById('edit-fullname').value = student.fullname;
+            document.getElementById('edit-gender').value = student.gender;
+            document.getElementById('edit-dob').value = student.dob;
+            document.getElementById('edit-grade').value = student.grade;
+            document.getElementById('edit-room').value = student.room;
+            document.getElementById('edit-pob_village').value = student.pob_village || '';
+            document.getElementById('edit-pob_commune').value = student.pob_commune || '';
+            document.getElementById('edit-pob_district').value = student.pob_district || '';
+            document.getElementById('edit-pob_province').value = student.pob_province || '';
+            document.getElementById('edit-father_name').value = student.father_name || '';
+            document.getElementById('edit-father_status').value = student.father_status || '';
+            document.getElementById('edit-father_job').value = student.father_job || '';
+            document.getElementById('edit-mother_name').value = student.mother_name || '';
+            document.getElementById('edit-mother_status').value = student.mother_status || '';
+            document.getElementById('edit-mother_job').value = student.mother_job || '';
+            document.getElementById('edit-curr_village').value = student.curr_village || '';
+            document.getElementById('edit-curr_commune').value = student.curr_commune || '';
+            document.getElementById('edit-curr_district').value = student.curr_district || '';
+            document.getElementById('edit-curr_province').value = student.curr_province || '';
+            document.getElementById('edit-ethnicity_religion').value = student.ethnicity_religion || '';
+
+            // Show edit modal
+            document.getElementById('edit-modal').style.display = 'block';
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').style.display = 'none';
+            document.getElementById('edit-form').reset();
+        }
+
+        // Handle edit form submission
+        document.getElementById('edit-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const id = document.getElementById('edit-id').value;
+            const student = students.find(s => s.id === id);
+
+            if (student) {
+                student.studentId = document.getElementById('edit-studentId').value;
+                student.fullname = document.getElementById('edit-fullname').value;
+                student.gender = document.getElementById('edit-gender').value;
+                student.dob = document.getElementById('edit-dob').value;
+                student.grade = document.getElementById('edit-grade').value;
+                student.room = document.getElementById('edit-room').value;
+                student.pob_village = document.getElementById('edit-pob_village').value;
+                student.pob_commune = document.getElementById('edit-pob_commune').value;
+                student.pob_district = document.getElementById('edit-pob_district').value;
+                student.pob_province = document.getElementById('edit-pob_province').value;
+                student.father_name = document.getElementById('edit-father_name').value;
+                student.father_status = document.getElementById('edit-father_status').value;
+                student.father_job = document.getElementById('edit-father_job').value;
+                student.mother_name = document.getElementById('edit-mother_name').value;
+                student.mother_status = document.getElementById('edit-mother_status').value;
+                student.mother_job = document.getElementById('edit-mother_job').value;
+                student.curr_village = document.getElementById('edit-curr_village').value;
+                student.curr_commune = document.getElementById('edit-curr_commune').value;
+                student.curr_district = document.getElementById('edit-curr_district').value;
+                student.curr_province = document.getElementById('edit-curr_province').value;
+                student.ethnicity_religion = document.getElementById('edit-ethnicity_religion').value;
+
+                sortData();
+                filterStudents(currentFilterGrade, currentFilterRoom);
+                closeEditModal();
+
+                // រក្សាទុកទិន្នន័យដែលបានកែប្រែទៅកាន់ Database
+                fetch('databeas.php?action=update_student', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(student)
+                }).then(res => res.json()).then(res => {
+                    if (res && res.success) {
+                        showMessage("ជោគជ័យ", "ព័ត៌មានសិស្សត្រូវបានកែប្រែ និងរក្សាទុកក្នុង Database ដោយជោគជ័យ។", "success");
+                    } else {
+                        showMessage("ជោគជ័យ", "ព័ត៌មានសិស្សត្រូវបានកែប្រែដោយជោគជ័យ។", "success");
+                    }
+                }).catch(err => {
+                    console.warn("DB update error:", err);
+                    showMessage("ជោគជ័យ", "ព័ត៌មានសិស្សត្រូវបានកែប្រែដោយជោគជ័យ។", "success");
+                });
+            }
+        });
+
+        function showMessage(title, text, type = 'info') {
+            document.getElementById('message-title').textContent = title;
+            document.getElementById('message-text').textContent = text;
+            const iconDiv = document.getElementById('message-icon');
+            if (type === 'success') iconDiv.innerHTML = '<i class="fa-solid fa-circle-check text-green-500"></i>';
+            else if (type === 'error') iconDiv.innerHTML = '<i class="fa-solid fa-circle-exclamation text-red-500"></i>';
+            else iconDiv.innerHTML = '<i class="fa-solid fa-circle-info text-blue-500"></i>';
+            document.getElementById('message-box').style.display = 'block';
+        }
+
+        function closeMessageBox() { document.getElementById('message-box').style.display = 'none'; }
+
+        function openExportModal(type) {
+            exportType = type;
+            document.getElementById('export-modal-title').innerHTML = type === 'excel' ? '<i class="fa-solid fa-file-excel text-green-600 mr-2"></i> ទាញយកឯកសារ Excel' : '<i class="fa-solid fa-file-pdf text-red-600 mr-2"></i> បោះពុម្ពឯកសារ PDF';
+
+            selectedExportGrade = currentFilterGrade;
+            selectedExportRoom = currentFilterRoom;
+
+            updateExportGradeUI();
+            document.getElementById('export-modal').style.display = 'block';
+        }
+
+        function closeExportModal() { document.getElementById('export-modal').style.display = 'none'; }
+
+        function exportCurrentTableToPDF() {
+            // Get currently filtered data
+            let filteredStudents = students;
+            if (currentFilterGrade !== 'all') {
+                filteredStudents = filteredStudents.filter(s => s.grade === currentFilterGrade);
+                if (currentFilterRoom !== 'all') {
+                    filteredStudents = filteredStudents.filter(s => s.room === currentFilterRoom);
+                }
+            }
+
+            // Apply current sort
+            filteredStudents = sortFilteredData(filteredStudents);
+
+            if (filteredStudents.length === 0) {
+                showMessage("មិនមានទិន្នន័យ", "មិនមានទិន្នន័យសិស្សសម្រាប់បោះពុម្ពទេ។", "error");
+                return;
+            }
+
+            // Export directly to PDF
+            exportToPDF(filteredStudents, currentFilterGrade, currentFilterRoom);
+        }
+
+        function updateExportGradeUI() {
+            document.querySelectorAll('.export-grade-btn').forEach(btn => {
+                if (btn.getAttribute('data-grade') === selectedExportGrade) {
+                    btn.classList.add('bg-indigo-600', 'text-white');
+                    btn.classList.remove('bg-gray-100', 'text-black', 'text-gray-700', 'hover:bg-blue-50');
+                } else {
+                    btn.classList.add('bg-gray-100', 'hover:bg-blue-50');
+                    btn.classList.remove('bg-indigo-600', 'text-white');
+                }
+            });
+
+            const roomContainer = document.getElementById('export-room-options-container');
+            if (selectedExportGrade === 'all') {
+                roomContainer.classList.add('hidden');
+                selectedExportRoom = 'all';
+            } else {
+                roomContainer.classList.remove('hidden');
+                generateRoomFilterButtons(selectedExportGrade, selectedExportRoom, 'export-room-options', (r) => {
+                    selectedExportRoom = r;
+                    updateExportGradeUI();
+                }, true);
+            }
+        }
+
+        document.querySelectorAll('.export-grade-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                selectedExportGrade = this.getAttribute('data-grade');
+                selectedExportRoom = 'all';
+                updateExportGradeUI();
+            });
+        });
+
+        document.getElementById('confirm-export-btn').addEventListener('click', async function () {
+            closeExportModal();
+            let dataToExport = students;
+
+            if (selectedExportGrade !== 'all') {
+                dataToExport = dataToExport.filter(s => s.grade === selectedExportGrade);
+                if (selectedExportRoom !== 'all') {
+                    dataToExport = dataToExport.filter(s => s.room === selectedExportRoom);
+                }
+            }
+
+            if (dataToExport.length === 0) {
+                showMessage("មិនមានទិន្នន័យ", "មិនមានទិន្នន័យសិស្សសម្រាប់ទាញយកតាមលក្ខខណ្ឌដែលអ្នកបានជ្រើសរើសទេ។", "error");
+                return;
+            }
+
+            if (exportType === 'pdf') {
+                showMessage("កំពុងរៀបចំ...", "សូមរង់ចាំបន្តិច ប្រព័ន្ធកំពុងរៀបចំឯកសារ PDF។", "info");
+                setTimeout(async () => {
+                    await exportToPDF(dataToExport, selectedExportGrade, selectedExportRoom);
+                    closeMessageBox();
+                }, 100);
+            } else {
+                exportToExcel(dataToExport, selectedExportGrade, selectedExportRoom);
+            }
+        });
+
+        function exportToExcel(data, grade, room) {
+            try {
+                // Create header row with grade information
+                let gradeTitle = "បញ្ជីរាយនាមសិស្ស (សិស្សទាំងអស់)";
+                if (grade !== 'all') {
+                    gradeTitle = `បញ្ជីរាយនាមសិស្ស (ថ្នាក់${grade}`;
+                    if (room !== 'all') gradeTitle += ` បន្ទប់ ${room}`;
+                    gradeTitle += `)`;
+                }
+
+                // Create array of arrays for Excel with header row
+                const headerRow = ['ល.រ', 'អត្តលេខ', 'គោត្តនាម នាម', 'ភេទ', 'ថ្នាក់', 'ថ្ងៃខែឆ្នាំកំណើត', 'អាយុ',
+                    'ទីកន្លែងកំណើត (ភូមិ)', 'ទីកន្លែងកំណើត (ឃុំ)', 'ទីកន្លែងកំណើត (ស្រុក)', 'ទីកន្លែងកំណើត (ខេត្ត)',
+                    'ឈ្មោះឪពុក', 'ស្ថានភាពឪពុក', 'មុខរបរឪពុក',
+                    'ឈ្មោះម្តាយ', 'ស្ថានភាពម្តាយ', 'មុខរបរម្តាយ',
+                    'អាស័យដ្ឋានបច្ចុប្បន្ន (ភូមិ)', 'អាស័យដ្ឋានបច្ចុប្បន្ន (ឃុំ)', 'អាស័យដ្ឋានបច្ចុប្បន្ន (ស្រុក)', 'អាស័យដ្ឋានបច្ចុប្បន្ន (ខេត្ត)',
+                    'ជនជាតិ/សាសនា'];
+
+                const exportData = data.map((s, i) => [
+                    i + 1, s.studentId, s.fullname, s.gender, `${s.grade} (${s.room})`,
+                    formatDate(s.dob), calculateAge(s.dob),
+                    s.pob_village, s.pob_commune, s.pob_district, s.pob_province,
+                    s.father_name, s.father_status, s.father_job,
+                    s.mother_name, s.mother_status, s.mother_job,
+                    s.curr_village, s.curr_commune, s.curr_district, s.curr_province,
+                    s.ethnicity_religion
+                ]);
+
+                // Combine grade title row, header row, and data rows
+                const aoaData = [[gradeTitle], headerRow, ...exportData];
+
+                const worksheet = XLSX.utils.aoa_to_sheet(aoaData);
+
+                // Merge cells for the title row
+                worksheet['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 21 } }];
+
+                // Style the title row
+                if (worksheet['A1']) {
+                    worksheet['A1'].s = {
+                        font: { bold: true, sz: 14 },
+                        alignment: { horizontal: 'center' }
+                    };
+                }
+
+                const workbook = XLSX.utils.book_new();
+                let sheetName = grade === 'all' ? 'All_Students' : `G_${grade}`;
+                if (room !== 'all') sheetName += `_R_${room}`;
+                XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+                XLSX.writeFile(workbook, `បញ្ជីរាយនាមសិស្ស_${sheetName}.xlsx`);
+            } catch (error) {
+                console.error(error);
+                showMessage("កំហុស", "មានបញ្ហាក្នុងការទាញយក Excel។", "error");
+            }
+        }
+
+        /* 
+           =========== ប្រើប្រាស់ html2pdf ជំនួស jspdf ដើម្បីដោះស្រាយបញ្ហាដាច់ជើងអក្សរ ===========
+           បច្ចេកទេសនេះគឺ render HTML ទៅជា Canvas (ដែល Browser រៀបចំជើងអក្សរខ្មែរបាន១០០%) 
+           រួចយកវាទៅបោះពុម្ពជា PDF
+        */
+        async function exportToPDF(data, grade, room) {
+            try {
+                console.log("Exporting PDF with data:", data.length, "students");
+
+                // តម្រៀបទិន្នន័យតាមឈ្មោះមុននឹងបង្កើត PDF
+                data = sortFilteredData(data);
+
+                let title = "បញ្ជីរាយនាមសិស្ស";
+                if (grade !== 'all') {
+                    title += ` (ថ្នាក់${grade}`;
+                    if (room !== 'all') title += ` បន្ទប់ ${room}`;
+                    title += `)`;
+                } else {
+                    title += " (សិស្សទាំងអស់)";
+                }
+                const femaleCount = data.filter(s => s.gender === 'ស្រី').length;
+
+                // បង្កើតទម្រង់ HTML សម្រាប់ PDF
+                let styleStr = `
+                    <style>
+                        #pdf-wrap { font-family: 'Battambang', sans-serif; padding: 20px; background: white; width: 100%; }
+                        #pdf-wrap h2 { text-align: center; color: #193c82; font-size: 26px; font-weight: bold; margin-bottom: 20px; }
+                        #pdf-wrap .stats { text-align: right; color: #dc2626; font-size: 14px; margin-bottom: 10px; }
+                        #pdf-wrap table { width: 100%; border-collapse: collapse; font-size: 12px; }
+                        #pdf-wrap th, #pdf-wrap td { border: 1px solid #7cb3f5; padding: 6px; text-align: center; vertical-align: middle; overflow: hidden; }
+                        #pdf-wrap thead th { background-color: #a3cbf7; color: #0b4587; font-weight: bold; }
+                        #pdf-wrap .num-row th { background-color: #e1f0ff; color: #646e78; font-size: 10px; padding: 4px; }
+                        #pdf-wrap tbody tr { page-break-inside: avoid; }
+                        #pdf-wrap .name-col { text-align: left; font-weight: bold; color: #193c82; white-space: nowrap; }
+                        #pdf-wrap .age-col { color: #dc2626; font-weight: bold; }
+                    </style>
+                `;
+
+                let tableHead = `
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="width: 30px;">ល.រ</th>
+                            <th rowspan="2" style="width: 60px;">អត្តលេខ</th>
+                            <th rowspan="2" style="width: 140px;">គោត្តនាម នាម</th>
+                            <th rowspan="2" style="width: 40px;">ភេទ</th>
+                            <th rowspan="2" style="width: 50px;">ថ្នាក់</th>
+                            <th rowspan="2" style="width: 80px;">ថ្ងៃខែឆ្នាំកំណើត</th>
+                            <th rowspan="2" style="width: 40px;">អាយុ</th>
+                            <th colspan="4">ទីកន្លែងកំណើត</th>
+                            <th colspan="3">ឈ្មោះឪពុក និង មុខរបរ</th>
+                            <th colspan="3">ឈ្មោះម្តាយ និង មុខរបរ</th>
+                            <th colspan="4">អាស័យដ្ឋានបច្ចុប្បន្ន</th>
+                            <th rowspan="2">ជនជាតិ/សាសនា</th>
+                        </tr>
+                        <tr>
+                            <th>ភូមិ</th><th>ឃុំ/សង្កាត់</th><th>ស្រុក/ខណ្ឌ</th><th>ខេត្ត/ក្រុង</th>
+                            <th>គោត្តនាម នាម</th><th>រស់/ស្លាប់</th><th>មុខរបរ</th>
+                            <th>គោត្តនាម នាម</th><th>រស់/ស្លាប់</th><th>មុខរបរ</th>
+                            <th>ភូមិ</th><th>ឃុំ/សង្កាត់</th><th>ស្រុក/ខណ្ឌ</th><th>ខេត្ត/ក្រុង</th>
+                        </tr>
+                        <tr class="num-row">
+                            <th></th>
+                            ${[...Array(21)].map((_, i) => `<th>${i + 1}</th>`).join('')}
+                        </tr>
+                    </thead>
+                `;
+
+                let tableBody = `<tbody>`;
+                data.forEach((s, index) => {
+                    let bgColor = index % 2 === 0 ? '#ffffff' : '#f5faff';
+                    tableBody += `
+                        <tr style="background-color: ${bgColor};">
+                            <td>${toKhmerNum(index + 1)}</td>
+                            <td>${s.studentId}</td>
+                            <td class="name-col">${s.fullname}</td>
+                            <td>${s.gender}</td>
+                            <td>${s.grade} (${s.room})</td>
+                            <td>${formatDate(s.dob)}</td>
+                            <td class="age-col">${toKhmerNum(calculateAge(s.dob))}</td>
+                            
+                            <td>${s.pob_village || ""}</td><td>${s.pob_commune || ""}</td><td>${s.pob_district || ""}</td><td>${s.pob_province || ""}</td>
+                            <td style="text-align: left;">${s.father_name || ""}</td><td>${s.father_status || ""}</td><td>${s.father_job || ""}</td>
+                            <td style="text-align: left;">${s.mother_name || ""}</td><td>${s.mother_status || ""}</td><td>${s.mother_job || ""}</td>
+                            <td>${s.curr_village || ""}</td><td>${s.curr_commune || ""}</td><td>${s.curr_district || ""}</td><td>${s.curr_province || ""}</td>
+                            <td>${s.ethnicity_religion || ""}</td>
+                        </tr>
+                    `;
+                });
+                tableBody += `</tbody>`;
+
+                let htmlContent = `
+                    <div id="pdf-wrap">
+                        ${styleStr}
+                        <h2>${title}</h2>
+                        <div class="stats">សិស្សសរុប៖ ${toKhmerNum(data.length)} នាក់, ស្រី៖ ${toKhmerNum(femaleCount)} នាក់</div>
+                        <table>
+                            ${tableHead}
+                            ${tableBody}
+                        </table>
+                    </div>
+                `;
+
+                let fileName = `បញ្ជីរាយនាមសិស្ស`;
+                if (grade !== 'all') fileName += `_ថ្នាក់ទី${grade}`;
+                if (room !== 'all') fileName += `_បន្ទប់${room}`;
+
+                const opt = {
+                    margin: 0.3,
+                    filename: `${fileName}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        logging: true,
+                        onclone: function (clonedDoc) {
+                            clonedDoc.body.style.display = 'block';
+                            clonedDoc.body.style.height = 'auto';
+                            clonedDoc.body.style.minHeight = 'auto';
+
+                            // Ensure the cloned container and its wrappers do not have flexbox display
+                            const pdfWrap = clonedDoc.getElementById('pdf-wrap');
+                            if (pdfWrap) {
+                                let parent = pdfWrap.parentElement;
+                                while (parent && parent !== clonedDoc.body) {
+                                    parent.style.display = 'block';
+                                    parent.style.height = 'auto';
+                                    parent = parent.parentElement;
+                                }
+                            }
+                        }
+                    },
+                    jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+                };
+
+                // debug
+                const testDiv = document.createElement('div');
+                testDiv.innerHTML = htmlContent;
+                document.body.appendChild(testDiv);
+                console.log("testDiv offsetHeight:", testDiv.offsetHeight);
+                console.log("testDiv scrollHeight:", testDiv.scrollHeight);
+                console.log("testDiv html length:", testDiv.innerHTML.length);
+                document.body.removeChild(testDiv);
+
+                // ចាប់ផ្តើម Generate PDF ផ្ទាល់ពី HTML String ជំនួសឱ្យ DOM element ដើម្បីជៀសវាងបញ្ហាកម្ពស់ 0px
+                await html2pdf().set(opt).from(htmlContent).save();
+
+            } catch (e) {
+                console.error("PDF Error: ", e);
+                showMessage("បញ្ហាបច្ចេកទេស", "មិនអាចបង្កើតឯកសារ PDF បានទេ! សូមព្យាយាមម្តងទៀត។", "error");
+            }
+        }
+
+        // មុខងាររក្សាទុកទិន្នន័យទាំងអស់ទៅកាន់ Database
+        async function saveDataToDatabase() {
+            if (students.length === 0) {
+                showMessage("គ្មានទិន្នន័យ", "មិនមានទិន្នន័យសិស្សសម្រាប់រក្សាទុកទេ។", "info");
+                return;
+            }
+
+            const btn = document.getElementById('btn-save-db');
+            const originalHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> កំពុងរក្សាទុក...';
+            }
+
+            try {
+                const response = await fetch('databeas.php?action=save_all', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ students: students })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showMessage("ជោគជ័យ", "ទិន្នន័យសិស្ស (" + toKhmerNum(students.length) + " នាក់) ត្រូវបានរក្សាទុកក្នុង Database ដោយជោគជ័យ!", "success");
+                } else {
+                    showMessage("បញ្ហា", result.message || "មិនអាចរក្សាទុកទិន្នន័យបានទេ!", "error");
+                }
+            } catch (err) {
+                console.error("Error saving to database:", err);
+                showMessage("បញ្ហាតភ្ជាប់", "មិនអាចភ្ជាប់ទៅកាន់ Database បានទេ! សូមប្រាកដថាបានបើក Apache & MySQL នៅក្នុង XAMPP។", "error");
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }
+            }
+        }
+
+        // មុខងារទាញយកទិន្នន័យពី Database ពេលបើកកម្មវិធី
+        async function loadStudentsFromDatabase() {
+            try {
+                const response = await fetch('databeas.php?action=get_students');
+                const result = await response.json();
+                if (result.success && Array.isArray(result.data) && result.data.length > 0) {
+                    students = result.data.map(s => ({
+                        id: s.id ? s.id.toString() : generateId(),
+                        studentId: s.studentId || '',
+                        fullname: s.fullname || '',
+                        gender: s.gender || 'ប្រុស',
+                        dob: s.dob || '',
+                        grade: s.grade || 'ទី១',
+                        room: s.room || 'ក',
+                        pob_village: s.pob_village || '',
+                        pob_commune: s.pob_commune || '',
+                        pob_district: s.pob_district || '',
+                        pob_province: s.pob_province || '',
+                        father_name: s.father_name || '',
+                        father_status: s.father_status || '',
+                        father_job: s.father_job || '',
+                        mother_name: s.mother_name || '',
+                        mother_status: s.mother_status || '',
+                        mother_job: s.mother_job || '',
+                        curr_village: s.curr_village || '',
+                        curr_commune: s.curr_commune || '',
+                        curr_district: s.curr_district || '',
+                        curr_province: s.curr_province || '',
+                        ethnicity_religion: s.ethnicity_religion || 'ខ្មែរ/ព្រះពុទ្ធ'
+                    }));
+                    sortData();
+                    filterStudents('all', 'all');
+                    return;
+                }
+            } catch (err) {
+                console.warn("Could not load from DB, initializing sample data:", err);
+            }
+            generateSampleData();
+        }
+
+        // ==========================================
+        // ប្រព័ន្ធផ្ទៀងផ្ទាត់អ្នកប្រើ (Authentication System)
+        // ==========================================
+        let currentUser = null;
+
+        function openLoginModal() {
+            document.getElementById('login-modal').style.display = 'block';
+            document.getElementById('login-alert').classList.add('hidden');
+            setTimeout(() => {
+                const u = document.getElementById('login-username');
+                if (u) u.focus();
+            }, 100);
+        }
+
+        function closeLoginModal() {
+            document.getElementById('login-modal').style.display = 'none';
+        }
+
+        function openRegisterModal() {
+            document.getElementById('register-modal').style.display = 'block';
+            document.getElementById('register-alert').classList.add('hidden');
+            setTimeout(() => {
+                const f = document.getElementById('reg-fullname');
+                if (f) f.focus();
+            }, 100);
+        }
+
+        function closeRegisterModal() {
+            document.getElementById('register-modal').style.display = 'none';
+        }
+
+        function switchToRegisterModal() {
+            closeLoginModal();
+            openRegisterModal();
+        }
+
+        function switchToLoginModal() {
+            closeRegisterModal();
+            closeForgotPasswordModal();
+            openLoginModal();
+        }
+
+        function openForgotPasswordModal() {
+            closeLoginModal();
+            closeRegisterModal();
+            const modal = document.getElementById('forgot-modal');
+            if (modal) {
+                modal.style.display = 'block';
+                document.getElementById('forgot-alert').classList.add('hidden');
+                setTimeout(() => {
+                    const p = document.getElementById('forgot-phone');
+                    if (p) p.focus();
+                }, 100);
+            }
+        }
+
+        function closeForgotPasswordModal() {
+            const modal = document.getElementById('forgot-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function switchToLoginFromForgot() {
+            closeForgotPasswordModal();
+            openLoginModal();
+        }
+
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (!input || !icon) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        function showAuthAlert(alertId, message, type = 'error') {
+            const alertBox = document.getElementById(alertId);
+            if (!alertBox) return;
+            alertBox.className = type === 'error'
+                ? 'mb-4 p-3 rounded-lg text-xs font-medium bg-red-50 text-red-700 border border-red-200'
+                : 'mb-4 p-3 rounded-lg text-xs font-medium bg-green-50 text-green-700 border border-green-200';
+            alertBox.innerHTML = (type === 'error' ? '<i class="fa-solid fa-circle-exclamation mr-1.5"></i> ' : '<i class="fa-solid fa-circle-check mr-1.5"></i> ') + message;
+            alertBox.classList.remove('hidden');
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+            const btn = document.getElementById('btn-submit-login');
+            const originalText = btn.innerHTML;
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> កំពុងចូលប្រើ...';
+
+            try {
+                const response = await fetch('databeas.php?action=login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username, password: password })
+                });
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    showAuthAlert('login-alert', result.message || 'ចូលប្រើប្រព័ន្ធបានជោគជ័យ!', 'success');
+                    currentUser = result.data;
+                    localStorage.setItem('sms_current_user', JSON.stringify(currentUser));
+                    updateAuthUI();
+                    setTimeout(() => {
+                        closeLoginModal();
+                        document.getElementById('login-form').reset();
+                        showMessage("ជោគជ័យ", "សូមស្វាគមន៍ " + currentUser.fullname + " មកកាន់ប្រព័ន្ធ!", "success");
+                    }, 800);
+                } else {
+                    showAuthAlert('login-alert', result.message || 'ឈ្មោះអ្នកប្រើ ឬ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ!', 'error');
+                }
+            } catch (err) {
+                console.error("Login error:", err);
+                showAuthAlert('login-alert', 'មិនអាចភ្ជាប់ទៅកាន់ Server បានទេ! សូមប្រាកដថាបើក Apache & MySQL ក្នុង XAMPP។', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const fullname = document.getElementById('reg-fullname').value.trim();
+            const username = document.getElementById('reg-username').value.trim();
+            const phone = document.getElementById('reg-phone').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('reg-confirm-password').value;
+            const btn = document.getElementById('btn-submit-register');
+            const originalText = btn.innerHTML;
+
+            if (password !== confirmPassword) {
+                showAuthAlert('register-alert', 'ពាក្យសម្ងាត់ទាំងពីរមិនដូចគ្នាទេ! សូមផ្ទៀងផ្ទាត់ម្តងទៀត។', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> កំពុងបង្កើតគណនី...';
+
+            try {
+                const response = await fetch('databeas.php?action=register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fullname: fullname,
+                        username: username,
+                        phone: phone,
+                        password: password
+                    })
+                });
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    showAuthAlert('register-alert', 'ការបង្កើតគណនីបានជោគជ័យ!', 'success');
+                    currentUser = result.data;
+                    localStorage.setItem('sms_current_user', JSON.stringify(currentUser));
+                    updateAuthUI();
+                    setTimeout(() => {
+                        closeRegisterModal();
+                        document.getElementById('register-form').reset();
+                        showMessage("ជោគជ័យ", "គណនីរបស់អ្នកត្រូវបានបង្កើត និងបានចូលប្រើដោយស្វ័យប្រវត្តិ!", "success");
+                    }, 900);
+                } else {
+                    showAuthAlert('register-alert', result.message || 'មិនអាចបង្កើតគណនីបានទេ!', 'error');
+                }
+            } catch (err) {
+                console.error("Register error:", err);
+                showAuthAlert('register-alert', 'មិនអាចភ្ជាប់ទៅកាន់ Server បានទេ! សូមប្រាកដថាបើក Apache & MySQL ក្នុង XAMPP។', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        async function handleForgotPassword(e) {
+            e.preventDefault();
+            const phone = document.getElementById('forgot-phone').value.trim();
+            const newPassword = document.getElementById('forgot-new-password').value;
+            const confirmPassword = document.getElementById('forgot-confirm-password').value;
+            const btn = document.getElementById('btn-submit-forgot');
+            const originalText = btn.innerHTML;
+
+            if (newPassword !== confirmPassword) {
+                showAuthAlert('forgot-alert', 'ពាក្យសម្ងាត់ថ្មីទាំងពីរមិនដូចគ្នាទេ! សូមផ្ទៀងផ្ទាត់ម្តងទៀត។', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> កំពុងកំណត់ពាក្យសម្ងាត់...';
+
+            try {
+                const response = await fetch('databeas.php?action=forgot_password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phone: phone,
+                        new_password: newPassword
+                    })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    showAuthAlert('forgot-alert', result.message, 'success');
+                    setTimeout(() => {
+                        closeForgotPasswordModal();
+                        document.getElementById('forgot-form').reset();
+                        openLoginModal();
+                        document.getElementById('login-username').value = phone;
+                        showMessage("ជោគជ័យ", "ពាក្យសម្ងាត់ថ្មីត្រូវបានកំណត់រួចរាល់! សូមបញ្ចូលពាក្យសម្ងាត់ថ្មីដើម្បីចូលប្រើ។", "success");
+                    }, 1200);
+                } else {
+                    showAuthAlert('forgot-alert', result.message || 'មិនអាចកំណត់ពាក្យសម្ងាត់បានទេ!', 'error');
+                }
+            } catch (err) {
+                console.error("Forgot password error:", err);
+                showAuthAlert('forgot-alert', 'មិនអាចភ្ជាប់ទៅកាន់ Server បានទេ! សូមប្រាកដថាបើក Apache & MySQL ក្នុង XAMPP។', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        async function handleLogout() {
+            try {
+                await fetch('databeas.php?action=logout');
+            } catch (e) { }
+            currentUser = null;
+            localStorage.removeItem('sms_current_user');
+            window.location.href = 'dashboard.html';
+        }
+
+        function updateAuthUI() {
+            const guestBtns = document.getElementById('auth-guest-buttons');
+            const userProfile = document.getElementById('auth-user-profile');
+            const userNameEl = document.getElementById('auth-user-name');
+            const userRoleEl = document.getElementById('auth-user-role');
+
+            if (currentUser) {
+                if (guestBtns) guestBtns.classList.add('hidden');
+                if (userProfile) userProfile.classList.remove('hidden');
+                if (userNameEl) userNameEl.textContent = currentUser.fullname || currentUser.username;
+                if (userRoleEl) userRoleEl.textContent = (currentUser.role || 'user').toUpperCase();
+            } else {
+                if (guestBtns) guestBtns.classList.remove('hidden');
+                if (userProfile) userProfile.classList.add('hidden');
+            }
+        }
+
+        function initAuth() {
+            const saved = localStorage.getItem('sms_current_user');
+            if (saved) {
+                try {
+                    currentUser = JSON.parse(saved);
+                    updateAuthUI();
+                } catch (e) { }
+            } else {
+                // តម្រូវឱ្យមានគណនី និង Login មុនចូលប្រើប្រាស់
+                window.location.replace('dashboard.html');
+                return;
+            }
+
+            // Sync with backend session
+            fetch('databeas.php?action=check_session')
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success && res.data) {
+                        currentUser = res.data;
+                        localStorage.setItem('sms_current_user', JSON.stringify(currentUser));
+                        updateAuthUI();
+                    } else {
+                        // ប្រសិនបើតេស្ត session បរាជ័យ ហើយគ្មាន saved user
+                        if (!saved) {
+                            currentUser = null;
+                            window.location.replace('dashboard.html');
+                        }
+                    }
+                })
+                .catch(() => { });
+        }
+
+        // Close modal when clicking outside backdrop
+        window.addEventListener('click', function (e) {
+            const loginModal = document.getElementById('login-modal');
+            const registerModal = document.getElementById('register-modal');
+            const forgotModal = document.getElementById('forgot-modal');
+            const exportModal = document.getElementById('export-modal');
+            const editModal = document.getElementById('edit-modal');
+            if (e.target === loginModal) closeLoginModal();
+            if (e.target === registerModal) closeRegisterModal();
+            if (e.target === forgotModal) closeForgotPasswordModal();
+            if (e.target === exportModal) closeExportModal();
+            if (e.target === editModal) closeEditModal();
+        });
+
+        // Close on ESC key
+        window.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeLoginModal();
+                closeRegisterModal();
+                closeForgotPasswordModal();
+                closeExportModal();
+                closeEditModal();
+            }
+        });
+
+        window.onload = function () {
+            initAuth();
+            loadStudentsFromDatabase();
+        };
+    </script>
+</body>
+
+</html>
